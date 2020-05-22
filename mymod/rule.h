@@ -11,8 +11,8 @@
 #define RU_DROP 0
 // time 标记
 #define TIME (1 << 0)
-#define DATASTART (1 << 1)
-#define DATAEND (1 << 2)
+#define DATESTART (1 << 1)
+#define DATEEND (1 << 2)
 #define WEEKDAYS (1 << 5)
 #define WEEKNOT (1 << 6)
 #define MONTHDAYS (1 << 3)

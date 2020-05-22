@@ -28,29 +28,119 @@ struct rule *ruleNow;
 struct sk_buff *skbNow;
 struct iphdr *iphdrNow;
 
-int chkBase()
+int chkBase(void)
 {
-    return 0;
+    return 1;
 }
 
-int chkTime()
+int chkTime(void)
 {
-    return 0;
+    struct timex txc;
+    struct rtc_time tm;
+    struct rtc_time *p;
+
+    do_gettimeofday(&txc.time); //获取当前UTC时间
+    // txc.time.tv_sec += 8 * 60 * 60;
+    txc.time.tv_sec -= sys_tz.tz_minuteswest * 60; //把UTC时间调整为本地时间
+    rtc_time_to_tm(txc.time.tv_sec, &tm);          //算出时间中的年月日等数值到tm中
+    p = &tm;
+
+    printk("%d %d %d ", (1900 + p->tm_year), (1 + p->tm_mon), p->tm_mday);
+    printk("%d %d:%d:%d\n", p->tm_wday, p->tm_hour, p->tm_min, p->tm_sec);
+
+    if (ruleNow->timeFlag & TIME)
+    {
+        int timeSec;
+        printk("into TIME\n");
+        timeSec = (p->tm_hour) * 3600 + (p->tm_min) * 60 + p->tm_sec;
+        if (timeSec >= ruleNow->timeStart && timeSec <= ruleNow->timeEnd)
+        {
+            return 1;
+        }
+        return 0;
+    }
+    else if ((ruleNow->timeFlag & DATESTART) || (ruleNow->timeFlag & DATEEND))
+    {
+        int flag;
+        flag = 1;
+        printk("into DATESTART DATEEND\n");
+        if (ruleNow->timeFlag & DATESTART)
+        {
+            int monthStart;
+            int dayStart;
+            monthStart = ruleNow->dateStart / 100;
+            dayStart = ruleNow->dateStart % 100;
+            printk("DATESTART:%d %d\n", monthStart, dayStart);
+            if (!(p->tm_mon >= monthStart && p->tm_mday >= dayStart))
+            {
+                flag &= 0;
+            }
+        }
+        if (ruleNow->timeFlag & DATEEND)
+        {
+            int monthEnd;
+            int dayEnd;
+            monthEnd = ruleNow->dateEnd / 100;
+            dayEnd = ruleNow->dateEnd % 100;
+            printk("DATEEND:%d %d\n", monthEnd, dayEnd);
+            if (!(p->tm_mon <= monthEnd && p->tm_mday <= dayEnd))
+            {
+                flag &= 0;
+            }
+        }
+        return flag;
+    }
+    else if (ruleNow->timeFlag & WEEKDAYS)
+    {
+        int timeWeek;
+        int flag;
+        printk("into WEEKDAYS\n");
+        timeWeek = 1 << p->tm_wday;
+        printk("%d,%d,%d\n", timeWeek, ruleNow->weekdays, timeWeek & ruleNow->weekdays);
+        flag = ((timeWeek & ruleNow->weekdays) ? 1 : 0);
+        if (ruleNow->timeFlag & WEEKNOT)
+        {
+            flag = 1 - flag;
+        }
+        return flag;
+    }
+    else if (ruleNow->timeFlag & MONTHDAYS)
+    {
+        int timeDay;
+        int flag;
+
+        printk("into MONTHDAYS\n");
+        timeDay = 1 << p->tm_mday;
+        printk("%x,%x,%x\n", timeDay, ruleNow->monthdays, timeDay & ruleNow->monthdays);
+        flag = ((timeDay & ruleNow->monthdays) ? 1 : 0);
+        if (ruleNow->timeFlag & MONTHNOT)
+        {
+            flag = 1 - flag;
+        }
+        return flag;
+    }
+    return 1;
 }
 
-int chkStr()
+int chkStr(void)
 {
-    return 0;
+    return 1;
 }
 
-unsigned int hook_func(unsigned int hooknum, struct sk_buff *skb, const struct net_device *in, const struct net_device *out, int (*okfn)(struct sk_buff *))
+unsigned int hook_func(unsigned int hooknum, //where to put the filter
+                       struct sk_buff *skb,
+                       const struct net_device *in,
+                       const struct net_device *out,
+                       int (*okfn)(struct sk_buff *))
 {
+    int i;
     skbNow = skb;
     iphdrNow = ip_hdr(skb);
-    for (int i = 1; i <= ruleNum; i++)
+    for (i = 1; i <= ruleNum; i++)
     {
+        int flag;
         ruleNow = ruleList + i;
-        int flag = chkBase();
+        flag = chkBase();
         if (ruleNow->timeFlag)
         {
             flag &= chkTime();
@@ -76,7 +166,7 @@ static ssize_t read_info(struct file *fd, const char __user *buf, size_t len, lo
         printk("error: not enough space in read\n");
         return -1;
     }
-    if (copy_to_user((void *)ruleList, buf, (ruleNum + 1) * RULESIZE))
+    if (copy_to_user(buf, (void *)ruleList, (ruleNum + 1) * RULESIZE))
     {
         printk("error: copy to uesr failed in read\n");
         return -1;
@@ -96,7 +186,9 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
     switch (ctrlhdr.ctrlType)
     {
     case CT_INSERT:
-        for (int i = ruleNum; i >= 1; i--)
+    {
+        int i;
+        for (i = ruleNum; i >= 1; i--)
         {
             ruleList[i + ctrlhdr.len] = ruleList[i];
         }
@@ -108,6 +200,7 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
         ruleNum += ctrlhdr.len;
         printk("info: write_info:: insert successfully\n");
         break;
+    }
     case CT_APPEND:
         if (copy_from_user((void *)(ruleList + 1 + ruleNum), buf, len - CTRLHDRSIZE))
         {
@@ -120,7 +213,8 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
     case CT_DELETE:
         if (ctrlhdr.len >= 1 && ctrlhdr.len <= ruleNum)
         {
-            for (int i = ctrlhdr.len + 1; i <= ruleNum; i++)
+            int i;
+            for (i = ctrlhdr.len + 1; i <= ruleNum; i++)
             {
                 ruleList[i - 1] = ruleList[i];
             }
@@ -137,7 +231,7 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
         printk("info: write_info:: flush successfully\n");
         break;
     case CT_DTAGET:
-        if (defaultTarget != ctrlheader.len)
+        if (defaultTarget != ctrlhdr.len)
         {
             defaultTarget = ctrlhdr.len;
             ruleDefault->pkgs = 0;
@@ -154,6 +248,7 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
         printk("error: unrecognized ctrl header\n");
         break;
     }
+    return len;
 }
 
 struct file_operations fops = {
@@ -166,7 +261,7 @@ static int __init initmodule(void)
 {
     int ret;
     printk("Init Module\n");
-    myhook.hook = hook_func;
+    myhook.hook = (nf_hookfn *)hook_func;
     myhook.hooknum = NF_INET_PRE_ROUTING;
     myhook.pf = PF_INET;
     myhook.priority = NF_IP_PRI_FIRST;
