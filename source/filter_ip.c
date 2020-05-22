@@ -1,7 +1,3 @@
-//
-// Created by David Frost on 2020-4-9.
-//
-
 #ifndef __KERNEL__
 #define __KERNEL__
 #endif
@@ -32,18 +28,18 @@ unsigned int hook_func(unsigned int hooknum,      //where to put the filter
     struct sk_buff *pskb=skb;
 
     struct iphdr *ip_header = ip_hdr(pskb);
-    /* printk("package from %d.%d.%d.%d\n",ip_header->saddr&0x000000FF,
-     (ip_header->saddr&0x0000FF00)>>8,
-     (ip_header->saddr&0x00FF0000)>>16,
-     (ip_header->saddr&0xFF000000)>>24);*/
+   /* printk("package from %d.%d.%d.%d\n",ip_header->saddr&0x000000FF,
+    (ip_header->saddr&0x0000FF00)>>8,
+    (ip_header->saddr&0x00FF0000)>>16,
+    (ip_header->saddr&0xFF000000)>>24);*/
     if((ip_header->saddr/*nh.iph->saddr by llh*/)==in_aton("192.168.0.103")) //check the source
     {
-        printk("<0>""A Packet from 192.168.0.103: DROP\n");
-        return NF_DROP;
+	printk("<0>""A Packet from 192.168.0.103: DROP\n");
+	return NF_DROP;
     }
     else
     {
-        return NF_ACCEPT;
+	return NF_ACCEPT;
     }
 
 }
