@@ -224,8 +224,8 @@ int main()
 
     ruleList[0].iprangeFlag = 1;
     ruleList[0].iprange_in = 1;
-	ruleList[0].ipstart = "192.168.1.101";
-    ruleList[0].ipend = "192.168.1.103";
+    strcpy(ruleList[0].ipstart, "192.168.1.101");
+    strcpy(ruleList[0].ipend, "192.168.1.103");
 
 	//ruleList[0].strFlag = 1;
     //strcpy(ruleList[0].strPattern, "xtfx");
