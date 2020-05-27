@@ -66,7 +66,7 @@ int readRuleInfo()
         printf("failed in open dev\n");
         return 0;
     }
-   int ret;
+    int ret;
     if ((ret = read(fd, (void *)ruleList, RULESIZE * RULEMAXNUM)) < 0)
     {
         printf("error: failed in readRuleInfo\n");
@@ -116,15 +116,96 @@ int setDefaultRule(int utarget)
     return writeCtrlInfo(CTRLHDRSIZE);
 }
 
+void displayTimeExt(struct rule *item)
+{
+    if (item->timeFlag & TIME)
+    {
+        int hourStart, minStart, secStart;
+        int hourEnd, minEnd, secEnd;
+        hourStart = item->timeStart / 3600;
+        minStart = (item->timeStart % 3600) / 60;
+        secStart = item->timeStart % 60;
+        printf("\t--timeStart %d:%d:%d", hourStart, minStart, secStart);
+        hourEnd = item->timeEnd / 3600;
+        minEnd = (item->timeEnd % 3600) / 60;
+        secEnd = item->timeEnd % 60;
+        printf("\t--timeEnd %d:%d:%d", hourEnd, minEnd, secEnd);
+    }
+    else if ((item->timeFlag & DATESTART) || (item->timeFlag & DATEEND))
+    {
+        if (item->timeFlag & DATESTART)
+        {
+            int monthStart;
+            int dayStart;
+            monthStart = item->dateStart / 100;
+            dayStart = item->dateStart % 100;
+            printf("\t--dateStart %d/%d", monthStart, dayStart);
+        }
+        if (item->timeFlag & DATEEND)
+        {
+            int monthEnd;
+            int dayEnd;
+            monthEnd = item->dateEnd / 100;
+            dayEnd = item->dateEnd % 100;
+            printf("\t--dateEnd %d/%d", monthEnd, dayEnd);
+        }
+    }
+    else if (item->timeFlag & WEEKDAYS)
+    {
+        int i;
+        if (item->timeFlag & WEEKNOT)
+        {
+            printf("\t--weekdays! ");
+        }
+        else
+        {
+            printf("\t--weekdays ");
+        }
+        for (i = 0; i <= 6; i++)
+        {
+            if ((1 << i) & item->weekdays)
+            {
+                printf("%d", i);
+            }
+        }
+    }
+    else if (item->timeFlag & MONTHDAYS)
+    {
+        int i;
+        if (item->timeFlag & WEEKNOT)
+        {
+            printf("\t--monthdays! ");
+        }
+        else
+        {
+            printf("\t--monthdays ");
+        }
+        for (i = 1; i <= 31; i++)
+        {
+            if ((1 << i) & item->monthdays)
+            {
+                printf("%d ", i);
+            }
+        }
+    }
+}
+
+void displayHeader()
+{
+    printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
+}
+
 void display(struct rule *item)
 {
-    printf("%d%d,%d%d,%d%d%d,%d%d%d\n", item->pkgs, item->bytes, item->protocol, item->target, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
-    printf("%d,%d%d,%d%d,%d,%d\n",item->timeFlag,item->timeStart,item->timeEnd,item->dateStart,item->dateEnd,item->weekdays,item->monthdays);
+    printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
+    if (item->timeFlag)
+        displayTimeExt(item);
     printf("\n");
 }
 
 int main()
 {
+    int i;
     initConst();
     initRule(&ruleList[0]);
     ruleList[0].target = RU_DROP;
@@ -132,17 +213,22 @@ int main()
     ruleList[0].dateEnd = 5 * 100 + 22;
     int ret = appendRule(1);
     printf("insert: %d\n", ret);
+    printf("inserted rules:\n");
+    displayHeader();
+    display(&ruleList[0]);
 
-     display(&ruleList[0]);
-
-     initRule(&ruleList[0]);
-     initRule(&ruleList[1]);
-
-     display(&ruleList[0]);
-     display(&ruleList[1]);
-
-     ret = readRuleInfo();
-     printf("read: %d\n", ret);
-     display(&ruleList[0]);
-     display(&ruleList[1]);
+    ret = readRuleInfo();
+    printf("read: %d\n", ret);
+    if (ruleList[0].target == 1)
+    {
+        printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
+    }
+    else
+    {
+        printf("default strategy: DROP pkg:%d", ruleList[0].pkgs);
+    }
+    printf("\trule nums: %d\n", ruleList[0].bytes);
+    displayHeader();
+    for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
+        display(&ruleList[1]);
 }
