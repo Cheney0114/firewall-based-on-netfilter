@@ -32,6 +32,7 @@ void display(struct rule *item)
 {
     printk("%d%d,%d%d,%d%d%d,%d%d%d\n", item->pkgs, item->bytes, item->protocol, item->target, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
     printk("timeflag:%d,%d%d,%d%d,%d,%d\n", item->timeFlag, item->timeStart, item->timeEnd, item->dateStart, item->dateEnd, item->weekdays, item->monthdays);
+    printk("strFlag:%d,%s\n",item->strFlag,item->strPattern);
     printk("\n");
 }
 
@@ -310,6 +311,9 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
         printk("error: unrecognized ctrl header\n");
         break;
     }
+    //int i;
+    //for(i=1;i<=ruleNum;i++)
+    //    display(&ruleList[i]);
     ruleDefault->bytes = ruleNum;
     printk("info: write_info:: total rule num:%d\n", ruleNum);
     return len;

@@ -216,14 +216,19 @@ int main()
     initConst();
     initRule(&ruleList[0]);
     ruleList[0].target = RU_DROP;
-    ruleList[0].strFlag = 2;
-    strcpy(ruleList[0].strPattern, "xtf");
+    ruleList[0].strFlag = 1;
+    strcpy(ruleList[0].strPattern, "xtfx");
+
+    initRule(&ruleList[1]);
+    ruleList[1].target = RU_DROP;
+    ruleList[1].strFlag = 3;
+    strcpy(ruleList[1].strPattern, "ckqc");
     
-    int ret = appendRule(1);
+    
+    int ret = appendRule(2);
     printf("insert: %d\n", ret);
     printf("inserted rules:\n");
     displayHeader();
-    display(&ruleList[0]);
 
     ret = readRuleInfo();
     printf("read: %d\n", ret);
@@ -238,5 +243,5 @@ int main()
     printf("\trule nums: %d\n", ruleList[0].bytes);
     displayHeader();
     for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
-        display(&ruleList[1]);
+        display(&ruleList[i]);
 }
