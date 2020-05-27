@@ -131,7 +131,44 @@ int chkTime(void)
 
 int chkStr(void)
 {
-    return 1;
+    //return 1表示可以规则匹配
+    //return 0表示不能规则不匹配
+    //使用ruleNow->strFlag 和 ruleNow->strPattern[STRPATSIZE + 1];
+
+    int i, j, k; //循环变量
+
+    struct sk_buff *pskb = skbNow; //pskb就是skbNow，只不过是前期写的代码用的pskb，移植过来就依然用pskb了
+
+    char *datap = pskb->data;                    //取出包中的数据
+    int pskblen = pskb->len;                     //包长度
+    int stringlen = strlen(ruleNow->strPattern); //匹配串长度
+    int allmatch = 0;                            //匹配次数
+    int match = 0;                               //单次的匹配的状态
+    char ch1, ch2;
+
+    if (ruleNow->strFlag == 0) //strFlag设置为0表示没有设置包内容匹配规则，非零表示要接收包，字符串最多出现的次数
+        return 1;
+
+    for (i = 0; i <= pskb->len - stringlen; i++)
+    {
+        match = 1;
+        ch1 = pskb->data[i];
+	for (k = i, j = 0; j < stringlen && ruleNow->strPattern[j]==pskb->data[k];j++,k++) {}
+
+        if (j==stringlen)
+        {
+            //说明匹配了整个串
+            allmatch += 1;
+        }
+
+        //检测allmatch
+        if (allmatch >= ruleNow->strFlag)
+        {
+            printk("<0> A Packet match the strRule\n");
+            return 1;
+        }
+    }
+    return 0;
 }
 
 unsigned int hook_func(unsigned int hooknum, //where to put the filter

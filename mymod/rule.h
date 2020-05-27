@@ -45,8 +45,8 @@ struct rule
     int weekdays;
     int monthdays;
 
-    int strFlag;
-    char strPattern[STRPATSIZE + 1];
+    int strFlag;  //strFlag设置为0表示没有设置包内容匹配规则，非零表示要接收包，字符串最多出现的次数
+    char strPattern[STRPATSIZE + 1];  //检测的字符串
 };
 #define RULESIZE (sizeof(struct rule))
 

@@ -190,6 +190,11 @@ void displayTimeExt(struct rule *item)
     }
 }
 
+void displayStrMatch(struct rule *item)
+{
+    printf("\t--strMaxNum %d --strPat %s",item->strFlag,item->strPattern);
+}
+
 void displayHeader()
 {
     printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
@@ -200,6 +205,8 @@ void display(struct rule *item)
     printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
     if (item->timeFlag)
         displayTimeExt(item);
+    if(item->strFlag)
+        displayStrMatch(item);
     printf("\n");
 }
 
@@ -209,8 +216,9 @@ int main()
     initConst();
     initRule(&ruleList[0]);
     ruleList[0].target = RU_DROP;
-    ruleList[0].timeFlag = DATEEND;
-    ruleList[0].dateEnd = 5 * 100 + 22;
+    ruleList[0].strFlag = 2;
+    strcpy(ruleList[0].strPattern, "xtf");
+    
     int ret = appendRule(1);
     printf("insert: %d\n", ret);
     printf("inserted rules:\n");
