@@ -33,6 +33,7 @@ void display(struct rule *item)
 {
     printk("%d%d,%d%d,%d%d%d,%d%d%d\n", item->pkgs, item->bytes, item->protocol, item->target, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
     printk("timeflag:%d,%d%d,%d%d,%d,%d\n", item->timeFlag, item->timeStart, item->timeEnd, item->dateStart, item->dateEnd, item->weekdays, item->monthdays);
+    printk("strFlag:%d,%s\n",item->strFlag,item->strPattern);
     printk("\n");
 }
 
@@ -132,7 +133,44 @@ int chkTime(void)
 
 int chkStr(void)
 {
-    return 1;
+    //return 1表示可以规则匹配
+    //return 0表示不能规则不匹配
+    //使用ruleNow->strFlag 和 ruleNow->strPattern[STRPATSIZE + 1];
+
+    int i, j, k; //循环变量
+
+    struct sk_buff *pskb = skbNow; //pskb就是skbNow，只不过是前期写的代码用的pskb，移植过来就依然用pskb了
+
+    char *datap = pskb->data;                    //取出包中的数据
+    int pskblen = pskb->len;                     //包长度
+    int stringlen = strlen(ruleNow->strPattern); //匹配串长度
+    int allmatch = 0;                            //匹配次数
+    int match = 0;                               //单次的匹配的状态
+    char ch1, ch2;
+
+    if (ruleNow->strFlag == 0) //strFlag设置为0表示没有设置包内容匹配规则，非零表示要接收包，字符串最多出现的次数
+        return 1;
+
+    for (i = 0; i <= pskb->len - stringlen; i++)
+    {
+        match = 1;
+        ch1 = pskb->data[i];
+	for (k = i, j = 0; j < stringlen && ruleNow->strPattern[j]==pskb->data[k];j++,k++) {}
+
+        if (j==stringlen)
+        {
+            //说明匹配了整个串
+            allmatch += 1;
+        }
+
+        //检测allmatch
+        if (allmatch >= ruleNow->strFlag)
+        {
+            printk("<0> A Packet match the strRule\n");
+            return 1;
+        }
+    }
+    return 0;
 }
 
 unsigned int ip2num(unsigned int ip)
@@ -155,10 +193,10 @@ unsigned int ip2num(unsigned int ip)
 int chkIprange(void)
 {
 	if (ruleNow->iprangeFlag & ruleNow->iprange_in) { // 1 means out is band
-		if(ip2num(iphdrNow->saddr) < ip2num(in_aton(ruleNow->ipstart))) { // 去掉小于start的ip
+		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 去掉小于start的ip
 			printk("<0>A Packet DROP\n");
 			return 0;
-		} else if(ip2num(iphdrNow->saddr) > ip2num(in_aton(ruleNow->ipend))) { // 去掉大于end的ip
+		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 去掉大于end的ip
 			printk("<0>A Packet DROP\n");
 			return 0;
 		} else {
@@ -166,10 +204,10 @@ int chkIprange(void)
 			return 1;
 		}
 	} else if (ruleNow->iprangeFlag & ~ruleNow->iprange_in) {
-		if(ip2num(iphdrNow->saddr) < ip2num(in_aton(ruleNow->ipstart))) { // 允许小于start的ip
+		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 允许小于start的ip
 			printk("################  enter  #################\n");
 			return 1;
-		} else if(ip2num(iphdrNow->saddr) > ip2num(in_aton(ruleNow->ipend))) { // 允许大于end的ip
+		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 允许大于end的ip
 			printk("################  enter  #################\n");
 			return 1;
 		} else {
@@ -323,6 +361,9 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
         printk("error: unrecognized ctrl header\n");
         break;
     }
+    //int i;
+    //for(i=1;i<=ruleNum;i++)
+    //    display(&ruleList[i]);
     ruleDefault->bytes = ruleNum;
     printk("info: write_info:: total rule num:%d\n", ruleNum);
     return len;

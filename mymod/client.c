@@ -192,6 +192,11 @@ void displayTimeExt(struct rule *item)
     }
 }
 
+void displayStrMatch(struct rule *item)
+{
+    printf("\t--strMaxNum %d --strPat %s",item->strFlag,item->strPattern);
+}
+
 void displayHeader()
 {
     printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
@@ -202,6 +207,8 @@ void display(struct rule *item)
     printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
     if (item->timeFlag)
         displayTimeExt(item);
+    if(item->strFlag)
+        displayStrMatch(item);
     printf("\n");
 	if (item->iprangeFlag)
 		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
@@ -216,13 +223,23 @@ int main()
     ruleList[0].target = RU_DROP;
 
     ruleList[0].iprangeFlag = 1;
+    ruleList[0].iprange_in = 1;
 	ruleList[0].ipstart = "192.168.1.101";
-    ruleList[0].ipend = "192.168.1.101";
-    int ret = appendRule(1);
+    ruleList[0].ipend = "192.168.1.103";
+
+	//ruleList[0].strFlag = 1;
+    //strcpy(ruleList[0].strPattern, "xtfx");
+
+    initRule(&ruleList[1]);
+    ruleList[1].target = RU_DROP;
+    ruleList[1].strFlag = 3;
+    strcpy(ruleList[1].strPattern, "ckqc");
+    
+    
+    int ret = appendRule(2);
     printf("insert: %d\n", ret);
     printf("inserted rules:\n");
     displayHeader();
-    display(&ruleList[0]);
 
     ret = readRuleInfo();
     printf("read: %d\n", ret);
@@ -237,5 +254,5 @@ int main()
     printf("\trule nums: %d\n", ruleList[0].bytes);
     displayHeader();
     for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
-        display(&ruleList[1]);
+        display(&ruleList[i]);
 }
