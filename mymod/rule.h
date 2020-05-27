@@ -49,8 +49,9 @@ struct rule
     char strPattern[STRPATSIZE + 1];
 
 	int iprangeFlag;
-	char ipstart[15];
-	char ipend[15];
+	int iprange_in; // 0 means ip in range is band, 1 means out is band
+	char* ipstart;
+	char* ipend;
 };
 #define RULESIZE (sizeof(struct rule))
 
