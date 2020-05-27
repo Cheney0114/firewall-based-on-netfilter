@@ -127,6 +127,51 @@ int chkStr(void)
     return 1;
 }
 
+unsigned int ip2num(unsigned int ip)
+{
+	unsigned int num;
+	unsigned int a, b, c, d;
+	a = ip >> 0 & 0xff;
+	num = a;
+	b = ip >> 8 & 0xff;
+	num = num * 0x100 + b;
+	c = ip >> 16 & 0xff;
+	num = num * 0x100 + c;
+	d = ip >> 24 & 0xff;
+	num = num * 0x100 + d;
+	printk("ip: %d.%d.%d.%d\n", a, b, c, d);
+
+	return num;
+}
+
+int chkIprange(void)
+{
+	if (rule->ipragneFlag & ) {
+		if(ip2num(iphdrNow->saddr) < ip2num(in_aton(item->ipstart))) { // 去掉小于start的ip
+			printk("<0>A Packet DROP\n");
+			return 0;
+		} else if(ip2num(iphdrNow->saddr) > ip2num(in_aton(item->ipend))) { // 去掉大于end的ip
+			printk("<0>A Packet DROP\n");
+			return 0;
+		} else {
+			printk("################  enter  #################\n");
+			return 1;
+		}
+	} else if (rule->iprangFlag & ) {
+		if(ip2num(iphdrNow->saddr) < ip2num(in_aton(item->ipstart))) { // 去掉小于start的ip
+			printk("################  enter  #################\n");
+			return 1;
+		} else if(ip2num(iphdrNow->saddr) > ip2num(in_aton(item->ipend))) { // 去掉大于end的ip
+			printk("################  enter  #################\n");
+			return 1;
+		} else {
+			printk("<0>A Packet DROP\n");
+			return 0;
+		}
+	}
+    return 1;
+}
+
 unsigned int hook_func(unsigned int hooknum, //where to put the filter
                        struct sk_buff *skb,
                        const struct net_device *in,
@@ -148,6 +193,10 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         if (ruleNow->strFlag)
         {
             flag &= chkStr();
+        }
+        if (ruleNow->IprangeFlag)
+        {
+            flag &= chkIprange();
         }
         if (flag)
         {

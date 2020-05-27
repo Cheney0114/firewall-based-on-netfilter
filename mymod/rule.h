@@ -47,6 +47,10 @@ struct rule
 
     int strFlag;
     char strPattern[STRPATSIZE + 1];
+
+	int iprangeFlag;
+	char ipstart[15];
+	char ipend[15];
 };
 #define RULESIZE (sizeof(struct rule))
 

@@ -36,6 +36,7 @@ void initRule(struct rule *item)
 
     item->timeFlag = 0;
     item->strFlag = 0;
+    item->iprangeFlag = 0;
 }
 
 int writeCtrlInfo(int size)
@@ -120,6 +121,7 @@ void display(struct rule *item)
 {
     printf("%d%d,%d%d,%d%d%d,%d%d%d\n", item->pkgs, item->bytes, item->protocol, item->target, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
     printf("%d,%d%d,%d%d,%d,%d\n",item->timeFlag,item->timeStart,item->timeEnd,item->dateStart,item->dateEnd,item->weekdays,item->monthdays);
+	printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend)
     printf("\n");
 }
 
