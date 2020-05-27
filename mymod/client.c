@@ -38,6 +38,9 @@ void initRule(struct rule *item)
     item->strFlag = 0;
     item->iprangeFlag = 0;
     item->iprange_in = 0;
+    
+    item->limitFlag = 0;
+	item->maxToken = 7;
 }
 
 int writeCtrlInfo(int size)
@@ -202,6 +205,16 @@ void displayHeader()
     printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
 }
 
+void displayIprangeMatch(struct rule *item)
+{
+	printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+}
+
+void displayLimitMatch(struct rule *item)
+{
+	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
+}
+
 void display(struct rule *item)
 {
     printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
@@ -211,7 +224,9 @@ void display(struct rule *item)
         displayStrMatch(item);
     printf("\n");
 	if (item->iprangeFlag)
-		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+        displayIprangeMatch(item);
+    if(item->limitFlag)
+		displayLimitMatch(item);
     printf("\n");
 }
 
@@ -224,8 +239,8 @@ int main()
 
     ruleList[0].iprangeFlag = 1;
     ruleList[0].iprange_in = 1;
-    strcpy(ruleList[0].ipstart, "192.168.1.101");
-    strcpy(ruleList[0].ipend, "192.168.1.103");
+    strcpy(ruleList[0].ipstart, "61.135.169.120");
+    strcpy(ruleList[0].ipend, "61.135.169.126");
 
 	//ruleList[0].strFlag = 1;
     //strcpy(ruleList[0].strPattern, "xtfx");
@@ -237,11 +252,21 @@ int main()
     
     
     int ret = appendRule(2);
+    /*-----------------------------------
+    initConst();
+    initRule(&ruleList[0]);
+	ruleList[0].target = RU_ACCEPT;
+    ruleList[0].limitFlag = 1;
+	strcpy(ruleList[0].rateStr, "6/minute");
+    int ret = appendRule(1);
+	------------------------------------*/
     printf("insert: %d\n", ret);
     printf("inserted rules:\n");
     displayHeader();
 
     ret = readRuleInfo();
+
+
     printf("read: %d\n", ret);
     if (ruleList[0].target == 1)
     {

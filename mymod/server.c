@@ -194,29 +194,89 @@ int chkIprange(void)
 {
 	if (ruleNow->iprangeFlag & ruleNow->iprange_in) { // 1 means out is band
 		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 去掉小于start的ip
-			printk("<0>A Packet DROP\n");
 			return 0;
 		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 去掉大于end的ip
-			printk("<0>A Packet DROP\n");
 			return 0;
 		} else {
-			printk("################  enter  #################\n");
 			return 1;
 		}
 	} else if (ruleNow->iprangeFlag & ~ruleNow->iprange_in) {
 		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 允许小于start的ip
-			printk("################  enter  #################\n");
 			return 1;
 		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 允许大于end的ip
-			printk("################  enter  #################\n");
 			return 1;
 		} else {
-			printk("<0>A Packet DROP\n");
 			return 0;
 		}
 	}
     return 1;
 }
+
+
+uint32_t get_nowtime(void){
+	struct timeval tv;
+	do_gettimeofday(&tv);
+	uint32_t t = tv.tv_sec*1000+tv.tv_usec/1000;
+	printk("millisecond:%ld\n", t);
+	return t;
+}
+
+uint32_t parse_rate(const char* rate, uint32_t* val){
+	char *delim;
+	uint32_t r;	
+	uint32_t mult = 1;
+	
+	delim = strchr(rate, '/');
+	if(delim){
+		if(strlen(delim+1) == 0)
+			return 0;
+
+		if(strncasecmp(delim+1, "second", strlen(delim + 1)) == 0)
+			mult = 1;
+		else if(strncasecmp(delim+1, "minute", strlen(delim + 1)) == 0)
+			mult = 60;
+		else if(strncasecmp(delim+1, "hour", strlen(delim + 1)) == 0)
+			mult = 60*60;
+		else if(strncasecmp(delim+1, "day", strlen(delim + 1)) == 0)
+			mult = 60*60*24;
+		else
+			return 0;
+	}
+	r = simple_strtol(rate, &delim, 10);
+	if(!r)
+		return 0;
+	*val = 1000 * mult / r;
+	return 1;
+}
+
+int chkLimit(void){
+	if(ruleNow->limitFlag == 1){
+        ruleNow->limitFlag = -1;
+        if(!parse_rate(ruleNow->rateStr, &(ruleNow->rate))){
+            printk("sry, limit format is illegal.\n");
+        }
+        printk("this rule rate is %d\n", ruleNow->rate);
+        ruleNow->lastTime = get_nowtime();
+        return 1;
+    }
+	uint32_t t = get_nowtime();
+    uint32_t tmp = (t - ruleNow->lastTime) / ruleNow->rate;
+	ruleNow->token += tmp;
+	ruleNow->lastTime += tmp * ruleNow->rate;
+    
+	if(ruleNow->token > ruleNow->maxToken) {
+        ruleNow->token = ruleNow->maxToken; 
+        ruleNow->lastTime = t;
+    }
+	printk("new now_time_ms %ld\n", ruleNow->lastTime);
+	printk("now token num is %d\n", ruleNow->token);
+	if(ruleNow->token){
+		ruleNow->token-=1;
+		return 1;
+	}
+	return 0;
+}
+
 
 unsigned int hook_func(unsigned int hooknum, //where to put the filter
                        struct sk_buff *skb,
@@ -243,6 +303,10 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();
+        }
+        if (ruleNow->limitFlag)
+        {
+            flag &= chkLimit();
         }
         if (flag)
         {

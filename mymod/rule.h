@@ -52,6 +52,13 @@ struct rule
 	int iprange_in; // 0 means ip in range is band, 1 means out is band
 	char ipstart[15];
 	char ipend[15];
+
+    int limitFlag;
+    unsigned int lastTime;
+    unsigned int token;
+    unsigned int rate;
+    char rateStr[20];
+    unsigned int maxToken;
 };
 #define RULESIZE (sizeof(struct rule))
 
