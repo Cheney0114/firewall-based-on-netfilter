@@ -23,15 +23,15 @@ void initRule(struct rule *item)
     item->pkgs = 0;
     item->bytes = 0;
 
-    item->saddr = 0;
+    strcpy(item->saddr, "");
     item->smark = 0;
     item->sport = 0;
 
-    item->daddr = 0;
+    strcpy(item->daddr, "");
     item->dmark = 0;
     item->dport = 0;
 
-    item->protocol = 0;
+    strcpy(item->protocol, "");
     item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
@@ -205,11 +205,6 @@ void displayHeader()
     printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
 }
 
-void displayIprangeMatch(struct rule *item)
-{
-	printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
-}
-
 void displayLimitMatch(struct rule *item)
 {
 	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
@@ -224,7 +219,7 @@ void display(struct rule *item)
         displayStrMatch(item);
     printf("\n");
 	if (item->iprangeFlag)
-        displayIprangeMatch(item);
+		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
     if(item->limitFlag)
 		displayLimitMatch(item);
     printf("\n");
@@ -239,8 +234,8 @@ int main()
 
     ruleList[0].iprangeFlag = 1;
     ruleList[0].iprange_in = 1;
-    strcpy(ruleList[0].ipstart, "61.135.169.120");
-    strcpy(ruleList[0].ipend, "61.135.169.126");
+	ruleList[0].ipstart = "192.168.1.101";
+    ruleList[0].ipend = "192.168.1.103";
 
 	//ruleList[0].strFlag = 1;
     //strcpy(ruleList[0].strPattern, "xtfx");
