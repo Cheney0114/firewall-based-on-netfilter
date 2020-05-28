@@ -52,6 +52,9 @@ struct rule
 	int iprange_in; // 0 means ip in range is band, 1 means out is band
 	char ipstart[15];
 	char ipend[15];
+	int mask_bit;
+	int src;
+	int dst;
 
     int limitFlag;
     unsigned int lastTime;

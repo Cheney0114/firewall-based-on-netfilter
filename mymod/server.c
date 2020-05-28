@@ -173,7 +173,7 @@ int chkStr(void)
     return 0;
 }
 
-unsigned int ip2num(unsigned int ip)
+unsigned int ip2num(unsigned int ip, char* name)
 {
 	unsigned int num;
 	unsigned int a, b, c, d;
@@ -185,28 +185,58 @@ unsigned int ip2num(unsigned int ip)
 	num = num * 0x100 + c;
 	d = ip >> 24 & 0xff;
 	num = num * 0x100 + d;
-	printk("ip: %d.%d.%d.%d\n", a, b, c, d);
+	printk("%s ip: %d.%d.%d.%d\n", name, a, b, c, d);
 
 	return num;
 }
 
 int chkIprange(void)
 {
-	if (ruleNow->iprangeFlag & ruleNow->iprange_in) { // 1 means out is band
-		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 去掉小于start的ip
-			return 0;
-		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 去掉大于end的ip
-			return 0;
-		} else {
-			return 1;
+	unsigned int ip_src, ip_dst, ip_start, ip_end, mask;
+	ip_src = ip2num(iphdrNow->saddr, "src");
+	ip_dst = ip2num(iphdrNow->daddr, "dst");
+	ip_start = ip2num(in_aton(ruleNow->ipstart), "start");
+	ip_end = ip2num(in_aton(ruleNow->ipend), "end");
+	mask = 0xffffffff << ruleNow->mask_bit;
+
+	if (ruleNow->src == 1) {
+		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
+			if(  ip_src <= ip_start  ) {
+				return 0;
+			} else if(ip_src >= ip_end) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else if (ruleNow->iprangeFlag) {
+			printk("mask: %x", mask);
+			ip_src = ip_src & mask;
+			ip_start = ip_start & mask;
+			if (ip_src == ip_start) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
-	} else if (ruleNow->iprangeFlag & ~ruleNow->iprange_in) {
-		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 允许小于start的ip
-			return 1;
-		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 允许大于end的ip
-			return 1;
-		} else {
-			return 0;
+	}
+	if (ruleNow->dst == 1) {
+		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
+			if(  ip_dst <= ip_start  ) {
+				return 0;
+			} else if(ip_dst >= ip_end) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else if (ruleNow->iprangeFlag) {
+			printk("mask: %x", mask);
+			ip_dst = ip_dst & mask;
+			ip_start = ip_start & mask;
+			if (ip_dst == ip_start) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 	}
     return 1;

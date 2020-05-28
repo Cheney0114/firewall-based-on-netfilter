@@ -35,9 +35,13 @@ void initRule(struct rule *item)
     item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
-    item->strFlag = 0;
-    item->iprangeFlag = 0;
-    item->iprange_in = 0;
+    
+	item->strFlag = 0;
+    
+	item->iprangeFlag = 0;
+	item->mask_bit = 0;
+	item->src = 0;
+	item->dst = 0;
     
     item->limitFlag = 0;
 	item->maxToken = 7;
@@ -207,7 +211,11 @@ void displayHeader()
 
 void displayIprangeMatch(struct rule *item)
 {
-	printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+	if (item->mask_bit == 0){
+		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+	} else {
+		printf("iprange: %d, (%s / %d)", item->iprangeFlag, item->ipstart, item->mask_bit);
+	}
 }
 
 void displayLimitMatch(struct rule *item)
@@ -239,8 +247,10 @@ int main()
 
     ruleList[0].iprangeFlag = 1;
     ruleList[0].iprange_in = 1;
-    strcpy(ruleList[0].ipstart, "61.135.169.120");
-    strcpy(ruleList[0].ipend, "61.135.169.126");
+	ruleList[0].mask_bit = 8;
+	ruleList[0].src = 1;
+    strcpy(ruleList[0].ipstart, "192.168.1.102");
+    strcpy(ruleList[0].ipend, "61.135.169.122");
 
 	//ruleList[0].strFlag = 1;
     //strcpy(ruleList[0].strPattern, "xtfx");
