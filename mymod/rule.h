@@ -26,11 +26,11 @@ struct rule
 
     // base model
     char saddr[20]; //"xxx.xxx.xxx.xxx"
-    int smark;      //24
+    int smask;      //24
     int sport;      //23,其中-1表示不检查端口
 
-    int daddr[20];
-    int dmark;
+    char daddr[20];
+    int dmask;
     int dport;
 
     char protocol[10]; //"tcp",其中"all"表示不检查协议类型
@@ -47,8 +47,13 @@ struct rule
     int weekdays;
     int monthdays;
 
-    int strFlag;
-    char strPattern[STRPATSIZE + 1];
+    //match string
+    int strFlag;  //strFlag表示要接收包中字符串至少出现的次数
+    char strPattern[STRPATSIZE + 1];  //检测的字符串
+	
+    //match regex
+    int regFlag;  //regFlag表示要接收包中正则匹配至少出现的次数
+    char regPattern[STRPATSIZE + 1];   //正则表达式
 
 	int iprangeFlag;
 	char ipstart[15];
@@ -61,6 +66,13 @@ struct rule
 	char iplist[10][15]; // 可以储存10个不连续的ip
 	int mult_src;
 	int mult_dst;
+    
+	int sportrangeFlag;
+    int sportStart;
+    int sportEnd;
+    int dportrangeFlag;
+    int dportStart;
+    int dportEnd;
 
     int limitFlag;
     unsigned int lastTime;
