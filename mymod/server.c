@@ -245,10 +245,310 @@ int chkTime(void)
     return 1;
 }
 
+
+
+
+#define REGEX_LENGTH 40
+ 
+//typedef unsigned char int;
+ 
+typedef enum
+{
+	IS_LETTER_OR_NUMBER = 0x11, //字母或数字
+	IS_NUMBER = 0x22,           //数字
+	IS_RANGE = 0x33,            //范围
+	IS_SPECIAL_VALUE = 0x44,    //指定值
+	IS_ERROR_TYPE = 0XAA,       //错误类型
+}valueType;
+ 
+typedef struct _STRUCT_VALUE_TYPE_INFOR
+{
+	valueType uType;
+	int uRange[2];
+}STRUCT_VALUE_TYPE_INFOR;
+
+
+
+
+enum COMPILE_ERROR
+{
+	REGEX_SUCCESS = 0,
+	REGEX_ERROR,
+	REGEX_LENGTH_ERROR
+};
+
+
+static STRUCT_VALUE_TYPE_INFOR g_stValueTypeInfor[REGEX_LENGTH];
+ 
+void init_value_type_infor(void)
+{
+	int i = 0;
+ 
+	for(; i < REGEX_LENGTH; i++)
+	{
+		g_stValueTypeInfor[i].uType = IS_SPECIAL_VALUE;
+		g_stValueTypeInfor[i].uRange[0] = 0;
+		g_stValueTypeInfor[i].uRange[1] = 0;
+	}
+}
+ 
+
+int isalnum(char p)
+{
+    //int res = 1;
+    //while(*p != 0)
+    //{
+	//int t = (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9');
+	//res = res && t;
+    //}
+    return (p >= 'a' && p <= 'z') || (p >= 'A' && p <= 'Z') || (p >= '0' && p <= '9');
+}
+
+
+//这里会把“编译”后的值信息放到g_stValueTypeInfor数组中
+int compile_regex(int * regex)
+{
+	char *pRegex = regex;
+	int uVINCount = 0;
+	int uOffset = 0;
+	int uOffsetSum = 0;
+ 
+	if(pRegex == NULL)
+	return REGEX_ERROR;
+ 
+	init_value_type_infor();
+ 
+	//printk("%s \n", pRegex);
+	while(*pRegex != '\0')
+	{
+		switch(*pRegex)
+		{
+			//printk("ss    %c \n", *pRegex);
+			case '\\':
+			{
+				if((pRegex[1] != 'w') && (pRegex[1] != 'd'))
+				return REGEX_ERROR;
+ 
+				if (pRegex[1] == 'w')
+				{
+					g_stValueTypeInfor[uVINCount].uType = IS_LETTER_OR_NUMBER;
+				}
+				else if (pRegex[1] == 'd')
+				{
+					g_stValueTypeInfor[uVINCount].uType = IS_NUMBER;
+				}
+ 
+				uVINCount += 1;
+				uOffset = 2;
+			}
+			break;
+			case '{':
+			{
+				int n = 0;
+				int i = 0;
+ 
+				if((!(pRegex[1]>='0' &&pRegex[1]<='9')) || (pRegex[2] != '}'))//若{n}中不是数字则认为是错误的
+				return REGEX_ERROR;
+ 
+				if(uOffsetSum == 0)//{n}写在表达式的开头是错误的
+				return REGEX_ERROR;
+ 
+				if(regex[uOffsetSum - 1] == '}')//{n}{m}这样写是错误的
+				return REGEX_ERROR;
+ 
+				n = pRegex[1] - 0x30;
+ 
+				if(n == 0)
+				return REGEX_ERROR;
+ 
+				for (; i < n - 1; i++)
+				{
+					g_stValueTypeInfor[uVINCount - 1 + i + 1] = g_stValueTypeInfor[uVINCount - 1];//复制前一个
+				}
+ 
+				uVINCount += n - 1;
+				uOffset = 3;
+ 
+			}
+			break;
+			case '[':
+			{
+				if( !isalnum(pRegex[1]) ||(pRegex[2] != '-')
+				|| !isalnum(pRegex[3]) ||(pRegex[4] != ']'))//[A-Z] OR [0-9] or [a-z] 并不严格判断 [0-z] is ok
+				return REGEX_ERROR;
+ 
+ 
+				g_stValueTypeInfor[uVINCount].uType = IS_RANGE;
+				g_stValueTypeInfor[uVINCount].uRange[0] = pRegex[1];
+				g_stValueTypeInfor[uVINCount].uRange[1] = pRegex[3];
+ 
+				uVINCount += 1;
+				uOffset = 5;
+			}
+			break;
+			default:
+			{
+				//if( !isprint(pRegex[0]) )//可打印字符[0x20-0x7e]
+				//return REGEX_ERROR;
+ 				//printk("!!!!!!!!!!!!!!%c \n",*pRegex);
+				g_stValueTypeInfor[uVINCount].uType = IS_SPECIAL_VALUE;
+				g_stValueTypeInfor[uVINCount].uRange[0] = pRegex[0];
+ 
+				uVINCount += 1;
+				uOffset = 1;
+			}
+			//break;
+ 
+		}//end switch
+ 
+		uOffsetSum += uOffset;
+		pRegex += uOffset;
+	}//end while
+ 
+	if(uVINCount > REGEX_LENGTH)
+	return REGEX_LENGTH_ERROR;
+ 
+	return REGEX_SUCCESS;
+}
+//正则表达式比较操作 data:待比较的数据源 uSum:待比较的数据长度
+//true:ok false:fail
+bool match_regex(const char * data, int uSum)
+{
+	int i = 0;
+ 
+	if(data == NULL)
+	return false;
+ 
+	while(i < uSum)
+	{
+		switch(g_stValueTypeInfor[i].uType)
+		{
+			case IS_LETTER_OR_NUMBER:
+			{
+				if( !isalnum(data[i]) )
+				{
+				//printk("111\n");
+				return false;
+				}
+			}
+			break;
+			case IS_NUMBER:
+			{
+				//if(!isdigit(data[i]))
+				if (data[i] > '9' || data[i] < '0')
+			{
+				//printk("is spes \n");
+				return false;
+			}
+			}
+			break;
+			case IS_RANGE:
+			{
+				if((data[i] < g_stValueTypeInfor[i].uRange[0]) 
+				|| (data[i] > g_stValueTypeInfor[i].uRange[1]))
+			{
+				//printk("is range \n");
+				return false;
+			}
+			}
+			break;
+			case IS_SPECIAL_VALUE:
+			{
+				if((char)data[i] != (char)g_stValueTypeInfor[i].uRange[0])
+			{
+				//printk(" %d  %c %c\n", i, data[i], g_stValueTypeInfor[i].uRange[0]);
+				//printk("is spes \n");
+				return false;
+			}
+			}
+			break;
+			default:
+			{
+				//printk("%d %X  defa\n", i,g_stValueTypeInfor[i].uType);
+				return false;
+			}
+ 
+		}//end switch
+ 
+		i += 1;
+ 
+		if(i == REGEX_LENGTH - 1)
+ 
+		return true;
+	}//end while
+ 
+	return false;  //weishu not match
+}
+
+
+
+
+int chkRegex(void)
+{
+    //return 1表示通过检查
+    //return 0表示不通过检查
+    //使用ruleNow->regFlag 和 ruleNow->regPattern[STRPATSIZE + 1];
+
+    int i, j; //循环变量
+
+    struct sk_buff *pskb = skbNow; //pskb就是skbNow，只不过是前期写的代码用的pskb，移植过来就依然用pskb了
+
+    char *datap = pskb->data;                    //取出包中的数据
+    int pskblen = pskb->len;                     //包长度
+    int stringlen = strlen(ruleNow->regPattern); //匹配串长度
+    int allmatch = 0;                            //匹配次数
+    int match = 0;                               //单次的匹配的状态
+
+    //if (ruleNow->regFlag == 0) //strFlag设置为0表示没有设置包内容匹配规则
+        //return 0;
+
+    compile_regex(ruleNow->regPattern);
+    //printk("compile success!\n");
+
+
+    for (i = 0; i <= pskb->len - 1; i++)
+    {
+		for (j = i + 1; j <= pskb->len - 1 && j - i + 1 <= stringlen; j++)
+		{
+			char temp[1000];
+			strncpy(temp, pskb->data + i, j-i+1);
+			temp[j-i+1] = 0;
+			//printk("%d %s\n", j-i+1, temp);
+			if(match_regex(temp, j-i+1))
+			{
+				allmatch += 1;
+				//printk("one match\n");
+				break;
+		    }
+		}
+    }
+	//printk("%x %x %x %x\n",g_stValueTypeInfor[0].uType,g_stValueTypeInfor[1].uType,g_stValueTypeInfor[2].uType,g_stValueTypeInfor[3].uType);
+    //printk("detect over \n");
+
+	//printk("%s \n", ruleNow->strPattern);
+	//compile_regex(ruleNow->strPattern);
+
+    //检测allmatch
+    if (allmatch >= ruleNow->regFlag)
+    {
+        printk("<0> A Packet match the regexRule\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
 int chkStr(void)
 {
-    //return 1表示可以规则匹配
-    //return 0表示不能规则不匹配
+    //return 1表示匹配规则
+    //return 0表示不匹配规则
     //使用ruleNow->strFlag 和 ruleNow->strPattern[STRPATSIZE + 1];
 
     int i, j, k; //循环变量
@@ -260,16 +560,15 @@ int chkStr(void)
     int stringlen = strlen(ruleNow->strPattern); //匹配串长度
     int allmatch = 0;                            //匹配次数
     int match = 0;                               //单次的匹配的状态
-    char ch1, ch2;
 
-    if (ruleNow->strFlag == 0) //strFlag设置为0表示没有设置包内容匹配规则，非零表示要接收包，字符串最多出现的次数
-        return 1;
+    //if (ruleNow->strFlag == 0) //strFlag设置为0表示没有设置包内容匹配规则
+        //return 0;
 
     for (i = 0; i <= pskb->len - stringlen; i++)
     {
         match = 1;
-        ch1 = pskb->data[i];
-	for (k = i, j = 0; j < stringlen && ruleNow->strPattern[j]==pskb->data[k];j++,k++) {}
+        //ch1 = pskb->data[i];
+		for (k = i, j = 0; j < stringlen && ruleNow->strPattern[j]==pskb->data[k];j++,k++) {}
 
         if (j==stringlen)
         {
@@ -286,6 +585,9 @@ int chkStr(void)
     }
     return 0;
 }
+
+
+
 
 unsigned int ip2num(unsigned int ip, char* name)
 {
