@@ -58,6 +58,14 @@ struct rule
 	int src;
 	int dst;
 
+    int sportrangeFlag;
+    int sportStart;
+    int sportEnd;
+    int dportrangeFlag;
+    int dportStart;
+    int dportEnd;
+
+
     int limitFlag;
     unsigned int lastTime;
     unsigned int token;

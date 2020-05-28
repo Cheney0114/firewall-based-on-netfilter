@@ -43,6 +43,9 @@ void initRule(struct rule *item)
 	item->src = 0;
 	item->dst = 0;
     
+    item->sportrangeFlag = 0;
+    item->dportrangeFlag = 0;
+
     item->limitFlag = 0;
 	item->maxToken = 7;
 }
@@ -223,6 +226,14 @@ void displayLimitMatch(struct rule *item)
 	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
 }
 
+void displayPortrangeMatch(struct rule *item)
+{
+    if(item->sportrangeFlag)
+    	printf("\t--sport_start %s --sport_end %d", item->sportStart, item->sportEnd);
+    if(item->dportrangeFlag)
+        printf("\t--dport_start %s --dport_end %d", item->dportStart, item->dportEnd);
+}
+
 void display(struct rule *item)
 {
     printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smask, item->sport, item->daddr, item->dmask, item->dport);
@@ -233,8 +244,11 @@ void display(struct rule *item)
     printf("\n");
 	if (item->iprangeFlag)
 		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+    if(item->sportrangeFlag || item->dportrangeFlag)
+        displayPortrangeMatch(item);
     if(item->limitFlag)
 		displayLimitMatch(item);
+    
     printf("\n");
 }
 

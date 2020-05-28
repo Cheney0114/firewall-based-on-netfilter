@@ -357,6 +357,53 @@ int chkIprange(void)
 }
 
 
+int chkPortrange(void){
+    int flag = 1;
+    if(ruleNow->sportrangeFlag){
+        if((iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
+            flag &= 0;
+        else
+        {
+            if(iphdrNow->protocol == IPPROTO_TCP){
+                struct tcphdr *thdr = tcp_hdr(skbNow);
+                if((thdr->source >= htons(ruleNow->sportStart)) && (thdr->source <= htons(ruleNow->sportEnd))) //check the dport
+                    flag &= 1;
+                else    
+                    flag &= 0;
+            }
+            else{ 
+                struct udphdr *uhdr = udp_hdr(skbNow);
+                if((uhdr->source >= htons(ruleNow->sportStart)) && (uhdr->source <= htons(ruleNow->sportEnd))) //check the dport
+                    flag &= 1;
+                else    
+                    flag &= 0;
+            }
+        }
+    }
+    else if(ruleNow->dportrangeFlag){
+        if((iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
+            flag &= 0;
+        else
+        {
+            if(iphdrNow->protocol == IPPROTO_TCP){
+                struct tcphdr *thdr = tcp_hdr(skbNow);
+                if((thdr->dest >= htons(ruleNow->dportStart)) && (thdr->dest <= htons(ruleNow->dportEnd))) //check the dport
+                    flag &= 1;
+                else    
+                    flag &= 0;
+            }
+            else{ 
+                struct udphdr *uhdr = udp_hdr(skbNow);
+                if((uhdr->dest >= htons(ruleNow->dportStart)) && (uhdr->dest <= htons(ruleNow->dportEnd))) //check the dport
+                    flag &= 1;
+                else    
+                    flag &= 0;
+            }
+        }        
+    }
+    return flag;
+}
+
 uint32_t get_nowtime(void){
 	struct timeval tv;
 	do_gettimeofday(&tv);
@@ -447,6 +494,9 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();
+        }
+        if(ruleNow->sportrangeFlag || ruleNow->dportrangeFlag){
+            flag &= chkPortrange();
         }
         if (ruleNow->limitFlag)
         {
