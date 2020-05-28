@@ -25,18 +25,20 @@ void initRule(struct rule *item)
 
     strcpy(item->saddr, "");
     item->smask = 0;
-    item->sport = 0;
+    item->sport = -1;
 
     strcpy(item->daddr, "");
     item->dmask = 0;
-    item->dport = 0;
+    item->dport = -1;
 
-    strcpy(item->protocol, "");
-    item->target = RU_DROP;
+    strcpy(item->protocol, "all");
+	item->flags[0] = 0;
+    item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
     
 	item->strFlag = 0;
+	item->regFlag = 0;
     
 	item->iprangeFlag = 0;
 	item->mask_bit = 0;

@@ -109,7 +109,6 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
                 flag &= 0;
         }
     }
-	printk("sport:%d\n", flag);
 
     if(ruleNow->sport >= 0 && (iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
         flag &= 0;
@@ -130,7 +129,6 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
                 flag &= 0;
         }
     }
-	printk("dport:%d\n", flag);
 
     //check flag
     if(ruleNow->flags[0] && (iphdrNow->protocol)!=IPPROTO_TCP)
@@ -149,10 +147,9 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
             flag &= thdr->ack;
         if(ruleNow->flags[6])
             flag &= thdr->urg;
-	printk("flags:%d\n", flag);
         
     }
-
+	printk("chkBase:%d\n", flag);
     return flag;
 }
 
@@ -812,7 +809,6 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         int flag;
         ruleNow = ruleList + i;
         flag = chkBase();
-		printk("flag: %d\n", flag);
         if (ruleNow->timeFlag)
         {
             flag &= chkTime();
@@ -829,12 +825,10 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         {
             flag &= chkIprange();
         }
-		printk("flag: %d\n", flag);
         if (ruleNow->multipFlag)
         {
             flag &= chkMultip();
 		}
-		printk("flag: %d\n", flag);
         if(ruleNow->sportrangeFlag || ruleNow->dportrangeFlag){
             flag &= chkPortrange();
         }
