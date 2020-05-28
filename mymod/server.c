@@ -793,6 +793,10 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         {
             flag &= chkStr();
         }
+        if (ruleNow->regFlag)
+        {
+            flag &= chkRegex();
+        }
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();
