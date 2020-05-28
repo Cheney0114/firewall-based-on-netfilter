@@ -37,9 +37,94 @@ void display(struct rule *item)
     printk("\n");
 }
 
-int chkBase(void)
+
+int chkBase(void) //检查基础功能——IP,端口,掩码,协议
 {
-    return 1;
+    int flag = 1;
+
+    if((iphdrNow->saddr & ruleNow->smark)==in_aton(ruleNow->saddr) >> (32 - ruleNow->smark) << (32 - ruleNow->smark)) //check the saddr
+        flag &= 1;
+    else
+	    flag &= 0;
+   
+    if((iphdrNow->daddr & ruleNow->dmark)==in_aton(ruleNow->daddr) >> (32 - ruleNow->dmark) << (32 - ruleNow->dmark))
+        flag &= 1;
+    else
+	    flag &= 0; 
+
+    if(iphdrNow->protocol == IPPROTO_ICMP && !strncasecmp(ruleNow->protocol, "icmp", 4))
+        flag &= 1;
+    else if(iphdrNow->protocol == IPPROTO_TCP && !strncasecmp(ruleNow->protocol, "tcp", 3))
+        flag &= 1;
+    else if(iphdrNow->protocol == IPPROTO_UDP && !strncasecmp(ruleNow->protocol, "udp", 3))
+        flag &= 1;
+    else if(!strncasecmp(ruleNow->protocol, "all", 3))
+        flag &= 1;
+    else
+        flag &= 0;
+    
+
+    if(ruleNow->dport >= 0 && (iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
+        flag &= 0;
+    else if(ruleNow->dport >= 0)
+    {
+        if(iphdrNow->protocol == IPPROTO_TCP){
+            struct tcphdr *thdr = tcp_hdr(skbNow);
+            if(thdr->dest == htons(ruleNow->dport)) //check the dport
+                flag &= 1;
+	        else    
+                flag &= 0;
+        }
+        else{ 
+            struct udphdr *uhdr = udp_hdr(skbNow);
+            if(uhdr->dest == htons(ruleNow->dport)) //check the dport
+                flag &= 1;
+	        else    
+                flag &= 0;
+        }
+    }
+
+    if(ruleNow->sport >= 0 && (iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
+        flag &= 0;
+    else if(ruleNow->sport >= 0)
+    {
+        if(iphdrNow->protocol == IPPROTO_TCP){
+            struct tcphdr *thdr = tcp_hdr(skbNow);
+            if(thdr->source == htons(ruleNow->sport)) //check the dport
+                flag &= 1;
+	        else    
+                flag &= 0;
+        }
+        else{ 
+            struct udphdr *uhdr = udp_hdr(skbNow);
+            if(uhdr->source == htons(ruleNow->sport)) //check the dport
+                flag &= 1;
+	        else    
+                flag &= 0;
+        }
+    }
+
+    //check flag
+    if(ruleNow->flags[0] && (iphdrNow->protocol)!=IPPROTO_TCP)
+        flag &= 0;
+    else if(ruleNow->flags[0]){
+        struct tcphdr *thdr = tcp_hdr(skbNow);
+        if(ruleNow->flags[1])
+            flag &= thdr->fin;
+        if(ruleNow->flags[2])
+            flag &= thdr->syn;
+        if(ruleNow->flags[3])
+            flag &= thdr->rst;
+        if(ruleNow->flags[4])
+            flag &= thdr->psh;
+        if(ruleNow->flags[5])
+            flag &= thdr->ack;
+        if(ruleNow->flags[6])
+            flag &= thdr->urg;
+        
+    }
+
+    return flag;
 }
 
 int chkTime(void)

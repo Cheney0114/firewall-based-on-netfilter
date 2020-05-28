@@ -23,15 +23,15 @@ void initRule(struct rule *item)
     item->pkgs = 0;
     item->bytes = 0;
 
-    item->saddr = 0;
+    strcpy(item->saddr, "");
     item->smark = 0;
     item->sport = 0;
 
-    item->daddr = 0;
+    strcpy(item->daddr, "");
     item->dmark = 0;
     item->dport = 0;
 
-    item->protocol = 0;
+    strcpy(item->protocol, "");
     item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
@@ -232,7 +232,7 @@ void display(struct rule *item)
         displayStrMatch(item);
     printf("\n");
 	if (item->iprangeFlag)
-        displayIprangeMatch(item);
+		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
     if(item->limitFlag)
 		displayLimitMatch(item);
     printf("\n");

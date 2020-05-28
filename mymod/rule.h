@@ -25,15 +25,17 @@ struct rule
     int bytes;
 
     // base model
-    int saddr;
-    int smark;
-    int sport;
+    char saddr[20]; //"xxx.xxx.xxx.xxx"
+    int smark;      //24
+    int sport;      //23,其中-1表示不检查端口
 
-    int daddr;
+    int daddr[20];
     int dmark;
     int dport;
 
-    int protocol;
+    char protocol[10]; //"tcp",其中"all"表示不检查协议类型
+    int flags[7]; //首位为是否检查标志位,后续fin, syn, rst, psh, ack, urg六个标志位
+
     int target;
 
     //extension model
