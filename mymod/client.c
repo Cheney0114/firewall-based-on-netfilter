@@ -38,6 +38,7 @@ void initRule(struct rule *item)
     item->timeFlag = 0;
     
 	item->strFlag = 0;
+	item->regFlag = 0;
     
 	item->iprangeFlag = 0;
 	item->mask_bit = 0;
