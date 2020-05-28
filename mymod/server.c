@@ -109,7 +109,6 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
                 flag &= 0;
         }
     }
-	printk("sport:%d\n", flag);
 
     if(ruleNow->sport >= 0 && (iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
         flag &= 0;
@@ -130,7 +129,6 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
                 flag &= 0;
         }
     }
-	printk("dport:%d\n", flag);
 
     //check flag
     if(ruleNow->flags[0] && (iphdrNow->protocol)!=IPPROTO_TCP)
@@ -149,10 +147,9 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
             flag &= thdr->ack;
         if(ruleNow->flags[6])
             flag &= thdr->urg;
-	printk("flags:%d\n", flag);
         
     }
-
+	printk("chkBase:%d\n", flag);
     return flag;
 }
 
