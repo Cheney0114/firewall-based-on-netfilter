@@ -333,6 +333,22 @@ int main()
     int ret = appendRule(1);
 	------------------------------------*/
 	//int ret = xxj_test_base();
+	
+    /*
+    //str测试代码
+    initRule(&ruleList[0]);
+    ruleList[0].target = RU_DROP;
+    ruleList[0].strFlag = 2;
+    strcpy(ruleList[0].strPattern, "hiddjk");
+
+    //regex测试代码
+    initRule(&ruleList[1]);
+    ruleList[1].target = RU_DROP;
+    ruleList[1].regFlag = 1;
+    strcpy(ruleList[1].regPattern, "[a-z][a-z]");
+    */
+	
+	
     printf("insert: %d\n", ret);
     printf("inserted rules:\n");
     displayHeader();
