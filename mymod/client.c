@@ -42,6 +42,10 @@ void initRule(struct rule *item)
 	item->mask_bit = 0;
 	item->src = 0;
 	item->dst = 0;
+
+	item->multipFlag = 0;
+	item->mult_src = 0;
+	item->mult_dst = 0;
     
     item->limitFlag = 0;
 	item->maxToken = 7;
@@ -218,6 +222,19 @@ void displayIprangeMatch(struct rule *item)
 	}
 }
 
+void displayMultipMatch(struct rule *item)
+{
+	char ip[15];
+	int i = 0;
+	strcpy(ip, item->iplist[i]);
+	printf("multip: ");
+	while ((strlen(ip) > 0) & (i < 10)){
+		printf("%s, ", ip);
+		i++;
+		strcpy(ip, item->iplist[i]);
+	}
+}
+
 void displayLimitMatch(struct rule *item)
 {
 	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
@@ -232,7 +249,11 @@ void display(struct rule *item)
         displayStrMatch(item);
     printf("\n");
 	if (item->iprangeFlag)
-		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+		displayIprangeMatch(item);
+    printf("\n");
+	if (item->multipFlag)
+		displayMultipMatch(item);
+    printf("\n");
     if(item->limitFlag)
 		displayLimitMatch(item);
     printf("\n");
@@ -246,11 +267,19 @@ int main()
     ruleList[0].target = RU_DROP;
 
     ruleList[0].iprangeFlag = 1;
-    ruleList[0].iprange_in = 1;
 	ruleList[0].mask_bit = 8;
 	ruleList[0].src = 1;
     strcpy(ruleList[0].ipstart, "192.168.1.102");
     strcpy(ruleList[0].ipend, "61.135.169.122");
+
+	/*
+    ruleList[0].multipFlag = 1;
+	ruleList[0].mult_src = 1;
+    strcpy(ruleList[0].iplist[0], "192.168.1.102");
+    strcpy(ruleList[0].iplist[1], "61.135.169.121");
+    strcpy(ruleList[0].iplist[2], "61.135.169.125");
+	*/
+
 
 	//ruleList[0].strFlag = 1;
     //strcpy(ruleList[0].strPattern, "xtfx");
@@ -274,7 +303,9 @@ int main()
     printf("inserted rules:\n");
     displayHeader();
 
+	printf("target: %d\n", ruleList[0].target);
     ret = readRuleInfo();
+	printf("target: %d\n", ruleList[0].target);
 
 
     printf("read: %d\n", ret);

@@ -324,9 +324,37 @@ int chkIprange(void)
 			}
 		}
 	}
-    return 1;
+    return 0;
 }
 
+int chkMultip(void) {
+	unsigned int ip_src, ip_dst, ip_ban;
+	ip_src = ip2num(iphdrNow->saddr, "src");
+	ip_dst = ip2num(iphdrNow->daddr, "dst");
+	
+	if (ruleNow->multipFlag) {
+		char ip[15];
+		int i = 0;
+		strcpy(ip, ruleNow->iplist[i]);
+		while ((strlen(ip) > 0) & (i < 10)) {
+			ip_ban = ip2num(in_aton(ip), "ban");
+			if (ruleNow->mult_src) {
+				if (ip_src == ip_ban) {
+					printk("ban\n");
+					return 1;
+				}
+			}
+			if (ruleNow->mult_dst) {
+				if (ip_dst == ip_ban) {
+					return 1;
+				}
+			}
+			i++;
+			strcpy(ip, ruleNow->iplist[i]);
+		}
+	}
+	return 0;
+}
 
 uint32_t get_nowtime(void){
 	struct timeval tv;
@@ -418,6 +446,10 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();
+        }
+        if (ruleNow->multipFlag)
+        {
+            flag &= chkMultip();
         }
         if (ruleNow->limitFlag)
         {

@@ -51,12 +51,16 @@ struct rule
     char strPattern[STRPATSIZE + 1];
 
 	int iprangeFlag;
-	int iprange_in; // 0 means ip in range is band, 1 means out is band
 	char ipstart[15];
 	char ipend[15];
 	int mask_bit;
 	int src;
 	int dst;
+
+	int multipFlag;
+	char iplist[10][15]; // 可以储存10个不连续的ip
+	int mult_src;
+	int mult_dst;
 
     int limitFlag;
     unsigned int lastTime;
