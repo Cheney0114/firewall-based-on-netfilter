@@ -26,11 +26,11 @@ struct rule
 
     // base model
     char saddr[20]; //"xxx.xxx.xxx.xxx"
-    int smark;      //24
+    int smask;      //24
     int sport;      //23,其中-1表示不检查端口
 
-    int daddr[20];
-    int dmark;
+    char daddr[20];
+    int dmask;
     int dport;
 
     char protocol[10]; //"tcp",其中"all"表示不检查协议类型
@@ -52,8 +52,11 @@ struct rule
 
 	int iprangeFlag;
 	int iprange_in; // 0 means ip in range is band, 1 means out is band
-	char* ipstart;
-	char* ipend;
+	char ipstart[15];
+	char ipend[15];
+	int mask_bit;
+	int src;
+	int dst;
 
     int limitFlag;
     unsigned int lastTime;

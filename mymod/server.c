@@ -31,23 +31,50 @@ struct iphdr *iphdrNow;
 
 void display(struct rule *item)
 {
-    printk("%d%d,%d%d,%d%d%d,%d%d%d\n", item->pkgs, item->bytes, item->protocol, item->target, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
+    printk("%d%d,%s%d,%s%d%d,%s%d%d\n", item->pkgs, item->bytes, item->protocol, item->target, item->saddr, item->smask, item->sport, item->daddr, item->dmask, item->dport);
     printk("timeflag:%d,%d%d,%d%d,%d,%d\n", item->timeFlag, item->timeStart, item->timeEnd, item->dateStart, item->dateEnd, item->weekdays, item->monthdays);
     printk("strFlag:%d,%s\n",item->strFlag,item->strPattern);
     printk("\n");
 }
 
 
-int chkBase(void) //检查基础功能——IP,端口,掩码,协议
-{
-    int flag = 1;
+unsigned int get_mask(int maskbit){
+	if (maskbit == 0) return 0;
+	unsigned int mask = 0xFFFFFFFF;
+	char* m = &mask;
+	mask = mask >> (unsigned int)(32-maskbit) << (32-maskbit);
+	char tmp1, tmp2;
+	tmp1 = m[0];
+	tmp2 = m[1];
+	m[0] = m[3];
+	m[1] = m[2];
+	m[2] = tmp2;
+	m[3] = tmp1;	
+	printk("%d mask:%x\n", maskbit, mask);
+	return mask;
+}
 
-    if((iphdrNow->saddr & ruleNow->smark)==in_aton(ruleNow->saddr) >> (32 - ruleNow->smark) << (32 - ruleNow->smark)) //check the saddr
+
+int chkBase(void) //检查基础功能——IP,端口,掩码,协议
+{    
+	int flag = 1;
+	 printk("package from %d.%d.%d.%d\n",iphdrNow->saddr&0x000000FF,
+    (iphdrNow->saddr&0x0000FF00)>>8,
+    (iphdrNow->saddr&0x00FF0000)>>16,
+    (iphdrNow->saddr&0xFF000000)>>24);
+	unsigned int smask = get_mask(ruleNow->smask);
+
+	if((iphdrNow->saddr & smask) == (in_aton(ruleNow->saddr) & smask))
         flag &= 1;
     else
 	    flag &= 0;
-   
-    if((iphdrNow->daddr & ruleNow->dmark)==in_aton(ruleNow->daddr) >> (32 - ruleNow->dmark) << (32 - ruleNow->dmark))
+	
+	printk("package to %d.%d.%d.%d\n",iphdrNow->daddr&0x000000FF,
+    (iphdrNow->daddr&0x0000FF00)>>8,
+    (iphdrNow->daddr&0x00FF0000)>>16,
+    (iphdrNow->daddr&0xFF000000)>>24);
+	unsigned int dmask = get_mask(ruleNow->dmask);
+    if((iphdrNow->daddr & dmask) == (in_aton(ruleNow->daddr) & dmask))
         flag &= 1;
     else
 	    flag &= 0; 
@@ -62,7 +89,6 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
         flag &= 1;
     else
         flag &= 0;
-    
 
     if(ruleNow->dport >= 0 && (iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
         flag &= 0;
@@ -83,6 +109,7 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
                 flag &= 0;
         }
     }
+	printk("sport:%d\n", flag);
 
     if(ruleNow->sport >= 0 && (iphdrNow->protocol)!=IPPROTO_TCP && (iphdrNow->protocol)!=IPPROTO_UDP) 
         flag &= 0;
@@ -103,6 +130,7 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
                 flag &= 0;
         }
     }
+	printk("dport:%d\n", flag);
 
     //check flag
     if(ruleNow->flags[0] && (iphdrNow->protocol)!=IPPROTO_TCP)
@@ -121,6 +149,7 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
             flag &= thdr->ack;
         if(ruleNow->flags[6])
             flag &= thdr->urg;
+	printk("flags:%d\n", flag);
         
     }
 
@@ -258,7 +287,7 @@ int chkStr(void)
     return 0;
 }
 
-unsigned int ip2num(unsigned int ip)
+unsigned int ip2num(unsigned int ip, char* name)
 {
 	unsigned int num;
 	unsigned int a, b, c, d;
@@ -270,34 +299,58 @@ unsigned int ip2num(unsigned int ip)
 	num = num * 0x100 + c;
 	d = ip >> 24 & 0xff;
 	num = num * 0x100 + d;
-	printk("ip: %d.%d.%d.%d\n", a, b, c, d);
+	printk("%s ip: %d.%d.%d.%d\n", name, a, b, c, d);
 
 	return num;
 }
 
 int chkIprange(void)
 {
-	if (ruleNow->iprangeFlag & ruleNow->iprange_in) { // 1 means out is band
-		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 去掉小于start的ip
-			printk("<0>A Packet DROP\n");
-			return 0;
-		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 去掉大于end的ip
-			printk("<0>A Packet DROP\n");
-			return 0;
-		} else {
-			printk("################  enter  #################\n");
-			return 1;
+	unsigned int ip_src, ip_dst, ip_start, ip_end, mask;
+	ip_src = ip2num(iphdrNow->saddr, "src");
+	ip_dst = ip2num(iphdrNow->daddr, "dst");
+	ip_start = ip2num(in_aton(ruleNow->ipstart), "start");
+	ip_end = ip2num(in_aton(ruleNow->ipend), "end");
+	mask = 0xffffffff << ruleNow->mask_bit;
+
+	if (ruleNow->src == 1) {
+		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
+			if(  ip_src <= ip_start  ) {
+				return 0;
+			} else if(ip_src >= ip_end) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else if (ruleNow->iprangeFlag) {
+			printk("mask: %x", mask);
+			ip_src = ip_src & mask;
+			ip_start = ip_start & mask;
+			if (ip_src == ip_start) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
-	} else if (ruleNow->iprangeFlag & ~ruleNow->iprange_in) {
-		if(ip2num(iphdrNow->saddr) <= ip2num(in_aton(ruleNow->ipstart))) { // 允许小于start的ip
-			printk("################  enter  #################\n");
-			return 1;
-		} else if(ip2num(iphdrNow->saddr) >= ip2num(in_aton(ruleNow->ipend))) { // 允许大于end的ip
-			printk("################  enter  #################\n");
-			return 1;
-		} else {
-			printk("<0>A Packet DROP\n");
-			return 0;
+	}
+	if (ruleNow->dst == 1) {
+		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
+			if(  ip_dst <= ip_start  ) {
+				return 0;
+			} else if(ip_dst >= ip_end) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else if (ruleNow->iprangeFlag) {
+			printk("mask: %x", mask);
+			ip_dst = ip_dst & mask;
+			ip_start = ip_start & mask;
+			if (ip_dst == ip_start) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 	}
     return 1;
@@ -308,7 +361,7 @@ uint32_t get_nowtime(void){
 	struct timeval tv;
 	do_gettimeofday(&tv);
 	uint32_t t = tv.tv_sec*1000+tv.tv_usec/1000;
-	printk("millisecond:%ld\n", t);
+	//printk("millisecond:%d\n", t);
 	return t;
 }
 

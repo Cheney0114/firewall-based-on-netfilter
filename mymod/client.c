@@ -24,20 +24,24 @@ void initRule(struct rule *item)
     item->bytes = 0;
 
     strcpy(item->saddr, "");
-    item->smark = 0;
+    item->smask = 0;
     item->sport = 0;
 
     strcpy(item->daddr, "");
-    item->dmark = 0;
+    item->dmask = 0;
     item->dport = 0;
 
     strcpy(item->protocol, "");
     item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
-    item->strFlag = 0;
-    item->iprangeFlag = 0;
-    item->iprange_in = 0;
+    
+	item->strFlag = 0;
+    
+	item->iprangeFlag = 0;
+	item->mask_bit = 0;
+	item->src = 0;
+	item->dst = 0;
     
     item->limitFlag = 0;
 	item->maxToken = 7;
@@ -205,6 +209,15 @@ void displayHeader()
     printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
 }
 
+void displayIprangeMatch(struct rule *item)
+{
+	if (item->mask_bit == 0){
+		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+	} else {
+		printf("iprange: %d, (%s / %d)", item->iprangeFlag, item->ipstart, item->mask_bit);
+	}
+}
+
 void displayLimitMatch(struct rule *item)
 {
 	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
@@ -212,7 +225,7 @@ void displayLimitMatch(struct rule *item)
 
 void display(struct rule *item)
 {
-    printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smark, item->sport, item->daddr, item->dmark, item->dport);
+    printf("%d\t%d\t %s\t%d\t %d/%d\t%d\t %d/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smask, item->sport, item->daddr, item->dmask, item->dport);
     if (item->timeFlag)
         displayTimeExt(item);
     if(item->strFlag)
@@ -225,17 +238,36 @@ void display(struct rule *item)
     printf("\n");
 }
 
+
+
+int xxj_test_base(void){
+	initRule(&ruleList[0]);
+	ruleList[0].target = RU_DROP;
+	strcpy(ruleList[0].saddr, "192.168.247.1");
+	ruleList[0].smask = 0;
+	//strcpy(ruleList[0].daddr, "192.168.247.130");
+	ruleList[0].dmask = 0;
+	ruleList[0].sport = -1;
+	ruleList[0].dport = -1;
+	strcpy(ruleList[0].protocol, "icmp");
+	return appendRule(1);
+}
+
+
 int main()
-{
-    int i;
+{    
+	int i;
     initConst();
+	/*
     initRule(&ruleList[0]);
     ruleList[0].target = RU_DROP;
 
     ruleList[0].iprangeFlag = 1;
     ruleList[0].iprange_in = 1;
-	ruleList[0].ipstart = "192.168.1.101";
-    ruleList[0].ipend = "192.168.1.103";
+	ruleList[0].mask_bit = 8;
+	ruleList[0].src = 1;
+    strcpy(ruleList[0].ipstart, "192.168.1.102");
+    strcpy(ruleList[0].ipend, "61.135.169.122");
 
 	//ruleList[0].strFlag = 1;
     //strcpy(ruleList[0].strPattern, "xtfx");
@@ -247,6 +279,7 @@ int main()
     
     
     int ret = appendRule(2);
+	*/
     /*-----------------------------------
     initConst();
     initRule(&ruleList[0]);
@@ -255,6 +288,7 @@ int main()
 	strcpy(ruleList[0].rateStr, "6/minute");
     int ret = appendRule(1);
 	------------------------------------*/
+	int ret = xxj_test_base();
     printf("insert: %d\n", ret);
     printf("inserted rules:\n");
     displayHeader();
