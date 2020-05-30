@@ -41,7 +41,8 @@ void initRule(struct rule *item)
 	item->regFlag = 0;
     
 	item->iprangeFlag = 0;
-	item->mask_bit = 32;
+	item->mask_start_bit = 32;
+	item->mask_end_bit = 32;
 	item->src = 0;
 	item->dst = 0;
 
@@ -226,11 +227,7 @@ void displayHeader()
 
 void displayIprangeMatch(struct rule *item)
 {
-	if (item->mask_bit == 0){
-		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
-	} else {
-		printf("iprange: %d, (%s / %d)", item->iprangeFlag, item->ipstart, item->mask_bit);
-	}
+	printf("iprange: %d, (%s/%d - %s/%d)", item->iprangeFlag, item->ipstart, item->mask_start_bit, item->ipend, item->mask_end_bit);
 }
 
 void displayMultipMatch(struct rule *item)

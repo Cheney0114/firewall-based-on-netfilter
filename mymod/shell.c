@@ -78,10 +78,10 @@ int main(){
         char *rev_cmd[20] = {0};
         int num = 0;
 
-        split(cmd," -",rev_cmd,&num);
+        split(cmd,"-",rev_cmd,&num);
 		if(rev_cmd[1][0] == 'h'){
 			system("cat help.txt");
-		}        
+		} 
 		else if(rev_cmd[1][0] == 'A'){
             initConst();
             initRule(&ruleList[0]);
@@ -92,7 +92,6 @@ int main(){
                 char *rev[5] = {0};
                 int n = 0;
                 split(command, " ", rev, &n);
-				printf("%s\n", rev[0]);
                 if(!strlen(rev[0]))
                     continue;
                 else if(!strcmp(rev[0], "p")){
@@ -136,37 +135,39 @@ int main(){
                 else if(!strcmp(rev[0], "-dport")){
                     ruleList[0].dport = atoi(rev[1]);
                 }
-                else if(!strcmp(rev[0], "-iprange_src")){
+                else if(!strcmp(rev[0], "iprange_src")){
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ":", ip, &n);
-					printf("lalal\n");
+                    ruleList[0].target = RU_DROP;
 					ruleList[0].iprangeFlag = 1;
 					ruleList[0].src = 1;
                     strcpy(ruleList[0].ipstart, ip[0]);
                     strcpy(ruleList[0].ipend, ip[1]);
-					printf("lalal\n");
                 }
-                else if(!strcmp(rev[0], "-iprange_dst")){
+                else if(!strcmp(rev[0], "iprange_dst")){
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ":", ip, &n);
+                    ruleList[0].target = RU_DROP;
 					ruleList[0].iprangeFlag = 1;
 					ruleList[0].dst = 1;
                     strcpy(ruleList[0].ipstart, ip[0]);
                     strcpy(ruleList[0].ipend, ip[1]);
 				}
-                else if(!strcmp(rev[0], "-iprange")){
+                else if(!strcmp(rev[0], "iprange")){
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ":", ip, &n);
+                    ruleList[0].target = RU_DROP;
 					ruleList[0].iprangeFlag = 1;
 					ruleList[0].dst = 1;
 					ruleList[0].src = 1;
                     strcpy(ruleList[0].ipstart, ip[0]);
                     strcpy(ruleList[0].ipend, ip[1]);
 				}
-                else if(!strcmp(rev[0], "-multip_src")){
+                else if(!strcmp(rev[0], "multip_src")){
+                    ruleList[0].target = RU_DROP;
 					ruleList[0].multipFlag = 1;
 					ruleList[0].mult_src = 1;
                     char *ip[5] = {0};
@@ -175,11 +176,13 @@ int main(){
 					if (num > 10){
 						printf("the num of IP is too much (more than 10)!");
 					}
-					for (int i = 0; i < num; i++) {
+					int i;
+					for (i = 0; i < num; i++) {
 						strcpy(ruleList[0].iplist[i], ip[i]);
 					}
 				}
-                else if(!strcmp(rev[0], "-multip_dst")){
+                else if(!strcmp(rev[0], "multip_dst")){
+                    ruleList[0].target = RU_DROP;
 					ruleList[0].multipFlag = 1;
 					ruleList[0].mult_dst = 1;
                     char *ip[5] = {0};
@@ -188,11 +191,13 @@ int main(){
 					if (num > 10){
 						printf("the num of IP is too much (more than 10)!");
 					}
-					for (int i = 0; i < num; i++) {
+					int i;
+					for (i = 0; i < num; i++) {
 						strcpy(ruleList[0].iplist[i], ip[i]);
 					}
 				}
-                else if(!strcmp(rev[0], "-multip")){
+                else if(!strcmp(rev[0], "multip")){
+                    ruleList[0].target = RU_DROP;
 					ruleList[0].multipFlag = 1;
 					ruleList[0].mult_src = 1;
 					ruleList[0].mult_dst = 1;
@@ -202,7 +207,8 @@ int main(){
 					if (num > 10){
 						printf("the num of IP is too much (more than 10)!");
 					}
-					for (int i = 0; i < num; i++) {
+					int i;
+					for (i = 0; i < num; i++) {
 						strcpy(ruleList[0].iplist[i], ip[i]);
 					}
 				}
