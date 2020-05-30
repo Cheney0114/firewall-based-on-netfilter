@@ -8,7 +8,8 @@ clean:
 
 install:
 	make
-	gcc client.c -o client.o
+
+	gcc client.c shell.c -o shell.o
 	sudo mknod /dev/ckq c 124 0
 	sudo chmod 777 /dev/ckq
 	sudo dmesg -c > /dev/null
