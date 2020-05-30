@@ -2,7 +2,7 @@ void initConst();
 void initRule(struct rule *item);
 int writeCtrlInfo(int size);
 int readRuleInfo();
-int insertRule(int len);
+int insertRule(int len, int idx);
 int appendRule(int len);
 int deleteRule(int index);
 int flushRule();

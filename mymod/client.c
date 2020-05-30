@@ -32,7 +32,7 @@ void initRule(struct rule *item)
     item->dport = -1;
 
     strcpy(item->protocol, "all");
-	item->flags[0] = 0;
+    item->flags[0] = 0;
     item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
@@ -54,7 +54,7 @@ void initRule(struct rule *item)
     item->dportrangeFlag = 0;
 
     item->limitFlag = 0;
-	item->maxToken = 7;
+    item->maxToken = 7;
 }
 
 int writeCtrlInfo(int size)
@@ -96,9 +96,10 @@ int readRuleInfo()
     return 1;
 }
 
-int insertRule(int len)
+int insertRule(int len, int idx)
 {
     ctrlhdr->ctrlType = CT_INSERT;
+    ctrlhdr->idx = idx;
     ctrlhdr->len = len;
     int size = CTRLHDRSIZE + len * RULESIZE;
     memcpy((void *)ruleInbuf, (void *)ruleList, len * RULESIZE);
@@ -211,7 +212,7 @@ void displayTimeExt(struct rule *item)
 
 void displayStrMatch(struct rule *item)
 {
-    printf("\t--strMaxNum %d --strPat %s",item->strFlag,item->strPattern);
+    printf("\t--strMaxNum %d --strPat %s", item->strFlag, item->strPattern);
 }
 
 void displayRegMatch(struct rule *item)
@@ -232,28 +233,29 @@ void displayIprangeMatch(struct rule *item)
 
 void displayMultipMatch(struct rule *item)
 {
-	char ip[15];
-	int i = 0;
-	strcpy(ip, item->iplist[i]);
-	printf("multip: ");
-	while ((strlen(ip) > 0) & (i < 10)){
-		printf("%s, ", ip);
-		i++;
-		strcpy(ip, item->iplist[i]);
-	}
+    char ip[15];
+    int i = 0;
+    strcpy(ip, item->iplist[i]);
+    printf("multip: ");
+    while ((strlen(ip) > 0) & (i < 10))
+    {
+        printf("%s, ", ip);
+        i++;
+        strcpy(ip, item->iplist[i]);
+    }
 }
 
 void displayLimitMatch(struct rule *item)
 {
-	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
+    printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
 }
 
 void displayPortrangeMatch(struct rule *item)
 {
-    if(item->sportrangeFlag)
-    	printf("\t--sport_start %s --sport_end %d", item->sportStart, item->sportEnd);
-    if(item->dportrangeFlag)
-        printf("\t--dport_start %s --dport_end %d", item->dportStart, item->dportEnd);
+    if (item->sportrangeFlag)
+        printf("\t--sport_start %d --sport_end %d", item->sportStart, item->sportEnd);
+    if (item->dportrangeFlag)
+        printf("\t--dport_start %d --dport_end %d", item->dportStart, item->dportEnd);
 }
 
 void display(struct rule *item)
@@ -261,7 +263,7 @@ void display(struct rule *item)
     printf("%d\t%d\t %s\t%s\t %s/%d\t%d\t %s/%d\t%d", item->pkgs, item->bytes, ((item->target == 1) ? "ACCEPT" : "DROP"), item->protocol, item->saddr, item->smask, item->sport, item->daddr, item->dmask, item->dport);
     if (item->timeFlag)
         displayTimeExt(item);
-    if(item->strFlag)
+    if (item->strFlag)
         displayStrMatch(item);
    
     if(item->regFlag)
@@ -270,35 +272,33 @@ void display(struct rule *item)
 	if (item->iprangeFlag)
 		displayIprangeMatch(item);
     printf("\n");
-	if (item->multipFlag)
-		displayMultipMatch(item);
+    if (item->multipFlag)
+        displayMultipMatch(item);
     printf("\n");
-    if(item->sportrangeFlag || item->dportrangeFlag)
+    if (item->sportrangeFlag || item->dportrangeFlag)
         displayPortrangeMatch(item);
-    if(item->limitFlag)
-		displayLimitMatch(item);
-    
+    if (item->limitFlag)
+        displayLimitMatch(item);
+
     printf("\n");
 }
 
-
-
-int xxj_test_base(void){
-	initRule(&ruleList[0]);
-	ruleList[0].target = RU_DROP;
-	strcpy(ruleList[0].saddr, "192.168.247.1");
-	ruleList[0].smask = 0;
-	//strcpy(ruleList[0].daddr, "192.168.247.130");
-	ruleList[0].dmask = 0;
-	ruleList[0].sport = -1;
-	ruleList[0].dport = -1;
-	strcpy(ruleList[0].protocol, "icmp");
-	return appendRule(1);
+int xxj_test_base(void)
+{
+    initRule(&ruleList[0]);
+    ruleList[0].target = RU_DROP;
+    strcpy(ruleList[0].saddr, "192.168.247.1");
+    ruleList[0].smask = 0;
+    //strcpy(ruleList[0].daddr, "192.168.247.130");
+    ruleList[0].dmask = 0;
+    ruleList[0].sport = -1;
+    ruleList[0].dport = -1;
+    strcpy(ruleList[0].protocol, "icmp");
+    return appendRule(1);
 }
-
 
 // int main()
-// {    
+// {
 // 	int i;
 //     initConst();
 //     initRule(&ruleList[0]);
@@ -318,7 +318,6 @@ int xxj_test_base(void){
 //     strcpy(ruleList[0].iplist[1], "61.135.169.121");
 //     strcpy(ruleList[0].iplist[2], "61.135.169.125");
 
-
 // 	//ruleList[0].strFlag = 1;
 //     //strcpy(ruleList[0].strPattern, "xtfx");
 
@@ -328,7 +327,7 @@ int xxj_test_base(void){
 //     ruleList[1].strFlag = 3;
 //     strcpy(ruleList[1].strPattern, "ckqc");
 //     */
-    
+
 //     int ret = appendRule(1);
 //     /*-----------------------------------
 //     initConst();
@@ -339,7 +338,7 @@ int xxj_test_base(void){
 //     int ret = appendRule(1);
 // 	------------------------------------*/
 // 	//int ret = xxj_test_base();
-	
+
 //     /*
 //     //str测试代码
 //     initRule(&ruleList[0]);
@@ -353,14 +352,12 @@ int xxj_test_base(void){
 //     ruleList[1].regFlag = 1;
 //     strcpy(ruleList[1].regPattern, "[a-z][a-z]");
 //     */
-	
-	
+
 //     printf("insert: %d\n", ret);
 //     printf("inserted rules:\n");
 //     displayHeader();
 
 //     ret = readRuleInfo();
-
 
 //     printf("read: %d\n", ret);
 //     if (ruleList[0].target == 1)

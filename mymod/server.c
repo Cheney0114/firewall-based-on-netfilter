@@ -875,11 +875,11 @@ static ssize_t write_info(struct file *fd, const char __user *buf, size_t len, l
     case CT_INSERT:
     {
         int i;
-        for (i = ruleNum; i >= 1; i--)
+        for (i = ruleNum; i >= ctrlhdr.idx; i--)
         {
             ruleList[i + ctrlhdr.len] = ruleList[i];
         }
-        if (copy_from_user((void *)(ruleList + 1), buf + CTRLHDRSIZE, len - CTRLHDRSIZE))
+        if (copy_from_user((void *)(ruleList + ctrlhdr.idx), buf + CTRLHDRSIZE, len - CTRLHDRSIZE))
         {
             printk("error: copy insert failed in write\n");
             return -1;
