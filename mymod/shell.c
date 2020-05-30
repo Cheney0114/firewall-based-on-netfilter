@@ -78,7 +78,7 @@ int main(){
         char *rev_cmd[20] = {0};
         int num = 0;
 
-        split(cmd,"-",rev_cmd,&num);
+        split(cmd," -",rev_cmd,&num);
 		if(rev_cmd[1][0] == 'h'){
 			system("cat help.txt");
 		}        
@@ -129,13 +129,24 @@ int main(){
                     else if(!strcmp(rev[1], "accpet"))
                         ruleList[0].target = RU_ACCEPT;
                 }
-                else if(!strcmp(rev[0], "sport")){
+                else if(!strcmp(rev[0], "-sport")){
                     ruleList[0].sport = atoi(rev[1]);
                 }
-                else if(!strcmp(rev[0], "dport")){
+                else if(!strcmp(rev[0], "-dport")){
                     ruleList[0].dport = atoi(rev[1]);
-                }
-
+                }			
+				else if(!strcmp(rev[0], "-strMaxNum")){
+					ruleList[0].strFlag = atoi(rev[1]);
+				}	
+				else if(!strcmp(rev[0], "-strPat")){
+					strcpy(ruleList[0].strPattern,rev[1]);
+				}				
+				else if(!strcmp(rev[0], "-regMaxNum")){
+					ruleList[0].regFlag = atoi(rev[1]);
+				}	
+				else if(!strcmp(rev[0], "-regPat")){
+					strcpy(ruleList[0].regPattern,rev[1]);
+				}		
             }
             appendRule(1);
             

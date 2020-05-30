@@ -15,6 +15,8 @@
 			-IP range过滤
 			-port range过滤
 			-限流过滤
+			-字符串匹配过滤
+			-正则表达式匹配过滤
 	
 
 	version：1.0.0
@@ -52,5 +54,14 @@
 
 	--limit xxx/[second|minute|hour|day]
 	--limit_burst xxx
+	
+	--strMaxNum  检测的字符串出现的阈值次数
+	--strPat   检测的字符串
+
+	--regMaxNum  检测的正则表达式出现的阈值次数
+	--regPat   检测的正则表达式
+
+
+
 
 	

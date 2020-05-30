@@ -474,7 +474,7 @@ bool match_regex(const char * data, int uSum)
 		return true;
 	}//end while
  
-	return false;  //weishu not match
+	return true;  //weishu not match
 }
 
 
@@ -485,6 +485,8 @@ int chkRegex(void)
     //return 1表示通过检查
     //return 0表示不通过检查
     //使用ruleNow->regFlag 和 ruleNow->regPattern[STRPATSIZE + 1];
+
+    //printk("******************************%d %s %d \n",ruleNow->regFlag, ruleNow->regPattern, strlen(ruleNow->regPattern));
 
     int i, j; //循环变量
 
@@ -505,7 +507,9 @@ int chkRegex(void)
 
     for (i = 0; i <= pskb->len - 1; i++)
     {
-		for (j = i + 1; j <= pskb->len - 1 && j - i + 1 <= stringlen; j++)
+		//printk(" pskb->len: %d\n",  pskb->len);
+		//printk(" stringlen: %d\n",  stringlen);
+		for (j = i + 1; j <= pskb->len - 1; j++)
 		{
 			char temp[1000];
 			strncpy(temp, pskb->data + i, j-i+1);
@@ -522,8 +526,8 @@ int chkRegex(void)
 	//printk("%x %x %x %x\n",g_stValueTypeInfor[0].uType,g_stValueTypeInfor[1].uType,g_stValueTypeInfor[2].uType,g_stValueTypeInfor[3].uType);
     //printk("detect over \n");
 
-	//printk("%s \n", ruleNow->strPattern);
-	//compile_regex(ruleNow->strPattern);
+	
+	compile_regex(ruleNow->strPattern);
 
     //检测allmatch
     if (allmatch >= ruleNow->regFlag)
