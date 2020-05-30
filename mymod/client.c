@@ -32,17 +32,22 @@ void initRule(struct rule *item)
     item->dport = -1;
 
     strcpy(item->protocol, "all");
-    item->flags[0] = 0;
+	item->flags[0] = 0;
     item->target = RU_ACCEPT;
 
     item->timeFlag = 0;
     
 	item->strFlag = 0;
+	item->regFlag = 0;
     
 	item->iprangeFlag = 0;
 	item->mask_bit = 0;
 	item->src = 0;
 	item->dst = 0;
+
+	item->multipFlag = 0;
+	item->mult_src = 0;
+	item->mult_dst = 0;
     
     item->sportrangeFlag = 0;
     item->dportrangeFlag = 0;
@@ -222,6 +227,19 @@ void displayIprangeMatch(struct rule *item)
 	}
 }
 
+void displayMultipMatch(struct rule *item)
+{
+	char ip[15];
+	int i = 0;
+	strcpy(ip, item->iplist[i]);
+	printf("multip: ");
+	while ((strlen(ip) > 0) & (i < 10)){
+		printf("%s, ", ip);
+		i++;
+		strcpy(ip, item->iplist[i]);
+	}
+}
+
 void displayLimitMatch(struct rule *item)
 {
 	printf("\t--limit %s --maxToken %d", item->rateStr, item->maxToken);
@@ -244,7 +262,11 @@ void display(struct rule *item)
         displayStrMatch(item);
     printf("\n");
 	if (item->iprangeFlag)
-		printf("iprange: %d, (%s - %s)", item->iprangeFlag, item->ipstart, item->ipend);
+		displayIprangeMatch(item);
+    printf("\n");
+	if (item->multipFlag)
+		displayMultipMatch(item);
+    printf("\n");
     if(item->sportrangeFlag || item->dportrangeFlag)
         displayPortrangeMatch(item);
     if(item->limitFlag)
@@ -273,28 +295,35 @@ int xxj_test_base(void){
 // {    
 // 	int i;
 //     initConst();
-// 	/*
 //     initRule(&ruleList[0]);
 //     ruleList[0].target = RU_DROP;
 
+// 	/*
 //     ruleList[0].iprangeFlag = 1;
-//     ruleList[0].iprange_in = 1;
 // 	ruleList[0].mask_bit = 8;
 // 	ruleList[0].src = 1;
 //     strcpy(ruleList[0].ipstart, "192.168.1.102");
 //     strcpy(ruleList[0].ipend, "61.135.169.122");
+// 	*/
+
+//     ruleList[0].multipFlag = 1;
+// 	ruleList[0].mult_src = 1;
+//     strcpy(ruleList[0].iplist[0], "192.168.1.102");
+//     strcpy(ruleList[0].iplist[1], "61.135.169.121");
+//     strcpy(ruleList[0].iplist[2], "61.135.169.125");
+
 
 // 	//ruleList[0].strFlag = 1;
 //     //strcpy(ruleList[0].strPattern, "xtfx");
 
 //     initRule(&ruleList[1]);
 //     ruleList[1].target = RU_DROP;
+// 	/*
 //     ruleList[1].strFlag = 3;
 //     strcpy(ruleList[1].strPattern, "ckqc");
+//     */
     
-    
-//     int ret = appendRule(2);
-// 	*/
+//     int ret = appendRule(1);
 //     /*-----------------------------------
 //     initConst();
 //     initRule(&ruleList[0]);
@@ -303,7 +332,23 @@ int xxj_test_base(void){
 // 	strcpy(ruleList[0].rateStr, "6/minute");
 //     int ret = appendRule(1);
 // 	------------------------------------*/
-// 	int ret = xxj_test_base();
+// 	//int ret = xxj_test_base();
+	
+//     /*
+//     //str测试代码
+//     initRule(&ruleList[0]);
+//     ruleList[0].target = RU_DROP;
+//     ruleList[0].strFlag = 2;
+//     strcpy(ruleList[0].strPattern, "hiddjk");
+
+//     //regex测试代码
+//     initRule(&ruleList[1]);
+//     ruleList[1].target = RU_DROP;
+//     ruleList[1].regFlag = 1;
+//     strcpy(ruleList[1].regPattern, "[a-z][a-z]");
+//     */
+	
+	
 //     printf("insert: %d\n", ret);
 //     printf("inserted rules:\n");
 //     displayHeader();
