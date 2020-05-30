@@ -135,6 +135,13 @@ int main(){
                 else if(!strcmp(rev[0], "dport")){
                     ruleList[0].dport = atoi(rev[1]);
                 }
+                else if(!strcmp(rev[0], "iprange")){
+                    char *ip[5] = {0};
+                    int n = 0;
+                    split(rev[1], "-", ip, &n);
+                    strcpy(ruleList[0].ipstart, ip[0]);
+                    strcpy(ruleList[0].ipend, ip[1]);
+                }
 
             }
             appendRule(1);
