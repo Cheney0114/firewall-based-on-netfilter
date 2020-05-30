@@ -214,6 +214,12 @@ void displayStrMatch(struct rule *item)
     printf("\t--strMaxNum %d --strPat %s", item->strFlag, item->strPattern);
 }
 
+void displayRegMatch(struct rule *item)
+{
+    printf("\t--regMaxNum %d --regPat %s",item->regFlag,item->regPattern);
+}
+
+
 void displayHeader()
 {
     printf("pkgs\tbytes\t target\tprot\t saddr\tsport\t daddr\tdport\n");
@@ -265,9 +271,12 @@ void display(struct rule *item)
         displayTimeExt(item);
     if (item->strFlag)
         displayStrMatch(item);
-    printf("\n");
-    if (item->iprangeFlag)
-        displayIprangeMatch(item);
+   
+    if(item->regFlag)
+        displayRegMatch(item);
+    printf("\n");		
+	if (item->iprangeFlag)
+		displayIprangeMatch(item);
     printf("\n");
     if (item->multipFlag)
         displayMultipMatch(item);
