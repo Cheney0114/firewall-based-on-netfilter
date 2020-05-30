@@ -167,7 +167,7 @@ int tryParseTime(int i, int argc, char *argv[])
 
 
 void parse_rule(int begin, int num){
-
+	int i;
     for (i = begin; i < num; i++)
             {
                 char command[20];
@@ -375,6 +375,7 @@ int main()
         remove_extra_space(cmd);
         if (!strcmp(cmd, "exit"))
         {
+			flushRule();
             break;
         }
         if (strncmp(cmd, "myiptables ", 11))
@@ -388,7 +389,6 @@ int main()
                 cmd[i] = ':';
             }
         }
-        int i = 0;
         int num = 0;
         split(cmd, "-", rev_cmd, &num);
 
