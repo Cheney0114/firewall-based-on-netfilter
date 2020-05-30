@@ -70,4 +70,11 @@
 	--multip_dst 多个不连续的目的ip地址 (地址用逗号分割，最多10个)
 	--multip 多个不连续的源/目的ip地址 (地址用逗号分割，最多10个)
 
-	
+	--time hS:mS:sS hE:mE:sE 检测收到包的时间处于[hS:mS:sS, hE:mE:sE]的时间段
+	--dateStart	date 	检测收到包的时间晚于date
+	--dateEnd	date	检测收到包的时间早于date
+	--weekdays	i j k ...	检测收到包的时间在一周中的第ijk...天中
+	--weekdays!	i j k ...	检测收到包的时间不在一周中的第ijk...天中
+	--monthdays	i j k ...	检测收到包的时间不在一月中的第ijk...天中
+	--monthdays!	i j k ...	检测收到包的时间不在一月中的第ijk...天中
+
