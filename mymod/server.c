@@ -244,7 +244,6 @@ int chkTime(void)
 
 
 
-
 #define REGEX_LENGTH 40
  
 //typedef unsigned char int;
@@ -407,6 +406,7 @@ int compile_regex(int * regex)
  
 	return REGEX_SUCCESS;
 }
+
 //正则表达式比较操作 data:待比较的数据源 uSum:待比较的数据长度
 //true:ok false:fail
 bool match_regex(const char * data, int uSum)
@@ -474,10 +474,8 @@ bool match_regex(const char * data, int uSum)
 		return true;
 	}//end while
  
-	return false;  //weishu not match
+	return true;  //weishu not match
 }
-
-
 
 
 int chkRegex(void)
@@ -485,6 +483,8 @@ int chkRegex(void)
     //return 1表示通过检查
     //return 0表示不通过检查
     //使用ruleNow->regFlag 和 ruleNow->regPattern[STRPATSIZE + 1];
+
+    //printk("******************************%d %s %d \n",ruleNow->regFlag, ruleNow->regPattern, strlen(ruleNow->regPattern));
 
     int i, j; //循环变量
 
@@ -505,7 +505,9 @@ int chkRegex(void)
 
     for (i = 0; i <= pskb->len - 1; i++)
     {
-		for (j = i + 1; j <= pskb->len - 1 && j - i + 1 <= stringlen; j++)
+		//printk(" pskb->len: %d\n",  pskb->len);
+		//printk(" stringlen: %d\n",  stringlen);
+		for (j = i + 1; j <= pskb->len - 1; j++)
 		{
 			char temp[1000];
 			strncpy(temp, pskb->data + i, j-i+1);
@@ -522,8 +524,8 @@ int chkRegex(void)
 	//printk("%x %x %x %x\n",g_stValueTypeInfor[0].uType,g_stValueTypeInfor[1].uType,g_stValueTypeInfor[2].uType,g_stValueTypeInfor[3].uType);
     //printk("detect over \n");
 
-	//printk("%s \n", ruleNow->strPattern);
-	//compile_regex(ruleNow->strPattern);
+	
+	compile_regex(ruleNow->strPattern);
 
     //检测allmatch
     if (allmatch >= ruleNow->regFlag)
@@ -534,12 +536,6 @@ int chkRegex(void)
 
     return 0;
 }
-
-
-
-
-
-
 
 
 int chkStr(void)
@@ -584,8 +580,6 @@ int chkStr(void)
 }
 
 
-
-
 unsigned int ip2num(unsigned int ip, char* name)
 {
 	unsigned int num;
@@ -605,15 +599,23 @@ unsigned int ip2num(unsigned int ip, char* name)
 
 int chkIprange(void)
 {
-	unsigned int ip_src, ip_dst, ip_start, ip_end, mask;
+	unsigned int ip_src, ip_dst, ip_start, ip_end, mask_start, mask_end, tmp;
 	ip_src = ip2num(iphdrNow->saddr, "src");
 	ip_dst = ip2num(iphdrNow->daddr, "dst");
 	ip_start = ip2num(in_aton(ruleNow->ipstart), "start");
 	ip_end = ip2num(in_aton(ruleNow->ipend), "end");
-	mask = 0xffffffff << (32 - ruleNow->mask_bit);
+	
+	
+	mask_satrt = 0xffffffff << (32 - ruleNow->mask_start_bit);
+	ip_start = ip_start & mask_start
+	mask_end = 0xffffffff << (32 - ruleNow->mask_end_bit);
+	tmp = 0xffffffff >> (ruleNow->mask_end_bit);
+	if (ruleNow->mask_end_bit != 32) {
+		ip_end = ip_end & mask_end + tmp + 1
+	}
 
-	if (ruleNow->src == 1) {
-		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
+	if (ruleNow->iprangeFlag) {
+		if (ruleNow->src == 1) {
 			if(  ip_src <= ip_start  ) {
 				return 0;
 			} else if(ip_src >= ip_end) {
@@ -621,34 +623,14 @@ int chkIprange(void)
 			} else {
 				return 1;
 			}
-		} else if (ruleNow->iprangeFlag) {
-			printk("mask: %x", mask);
-			ip_src = ip_src & mask;
-			ip_start = ip_start & mask;
-			if (ip_src == ip_start) {
-				return 1;
-			} else {
-				return 0;
-			}
 		}
-	}
-	if (ruleNow->dst == 1) {
-		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
+		if (ruleNow->dst == 1) {
 			if(  ip_dst <= ip_start  ) {
 				return 0;
 			} else if(ip_dst >= ip_end) {
 				return 0;
 			} else {
 				return 1;
-			}
-		} else if (ruleNow->iprangeFlag) {
-			printk("mask: %x", mask);
-			ip_dst = ip_dst & mask;
-			ip_start = ip_start & mask;
-			if (ip_dst == ip_start) {
-				return 1;
-			} else {
-				return 0;
 			}
 		}
 	}
@@ -821,6 +803,7 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         {
             flag &= chkRegex();
         }
+		printk("%d\n", ruleNow->iprangeFlag);
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();

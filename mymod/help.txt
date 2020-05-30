@@ -15,6 +15,8 @@
 			-IP range过滤
 			-port range过滤
 			-限流过滤
+			-字符串匹配过滤
+			-正则表达式匹配过滤
 	
 
 	version：1.0.0
@@ -53,5 +55,19 @@
 
 	--limit xxx/[second|minute|hour|day]
 	--limit_burst xxx
+	
+	--strMaxNum  检测的字符串出现的阈值次数
+	--strPat   检测的字符串
+
+	--regMaxNum  检测的正则表达式出现的阈值次数
+	--regPat   检测的正则表达式
+
+	--iprange_src 一段连续源ip地址 (首尾地址用冒号分割)
+	--iprange_dst 一段连续目的ip地址 (首尾地址用冒号分割)
+	--iprange 一段连续源\目的ip地址 (首尾地址用冒号分割)
+
+	--multip_src 多个不连续的源ip地址 (地址用逗号分割，最多10个)
+	--multip_dst 多个不连续的目的ip地址 (地址用逗号分割，最多10个)
+	--multip 多个不连续的源/目的ip地址 (地址用逗号分割，最多10个)
 
 	

@@ -58,7 +58,8 @@ struct rule
 	int iprangeFlag;
 	char ipstart[15];
 	char ipend[15];
-	int mask_bit;
+	int mask_start_bit;
+	int mask_end_bit;
 	int src;
 	int dst;
 
