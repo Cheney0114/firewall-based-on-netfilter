@@ -1,0 +1,56 @@
+-------------------------------------------------------------------------------------
+     myiptables是我们仿照iptables实现的基础包过滤防火墙规则配置工具。
+	 实现的功能包括:
+	 	+基础功能
+			-源IP
+			-目的IP
+			-源端口
+			-目的端口
+		 	-子网掩码
+		 	-协议类型
+		+扩展模块
+			-基于时间过滤
+			-基于字符内容过滤
+			-字符内容的正则过滤
+			-IP range过滤
+			-port range过滤
+			-限流过滤
+	
+
+	version：1.0.0
+	author：ckq|gmq|xtf|xxj
+-------------------------------------------------------------------------------------
+
+
+命令：
+	myiptables -L						
+	*以列表的形式显示当前使用的规则
+	------------------------------------
+	myiptables -h						
+	*查看帮助
+	------------------------------------
+	myiptables -A firewall-rule			
+	*添加一条规则
+	------------------------------------
+	myiptables -D rulenum				
+	*删除编号为rulenum的规则
+	------------------------------------
+	myiptables -I rulenum firewall-rule	
+	*插入一条规则到第rulenum条
+	------------------------------------
+	myiptables -R rulenum firewall-rule	
+	*将rulenum条规则替换为firewall-rule
+	------------------------------------
+
+	其中firewall-rule规则为
+	-p	协议
+	-s[/mask]	源IP
+	-d[/mask]	目的IP
+	-P	策略
+	--sport	源端口
+	--dport	目的端口
+
+	--limit xxx/[second|minute|hour|day]
+	--limit_burst xxx
+
+	
