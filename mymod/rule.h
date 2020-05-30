@@ -96,6 +96,7 @@ struct ctrlheader
 {
     int ctrlType;
     int len;
+    int idx;
 };
 #define CTRLHDRSIZE (sizeof(struct ctrlheader))
 
