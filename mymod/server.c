@@ -610,7 +610,7 @@ int chkIprange(void)
 	ip_dst = ip2num(iphdrNow->daddr, "dst");
 	ip_start = ip2num(in_aton(ruleNow->ipstart), "start");
 	ip_end = ip2num(in_aton(ruleNow->ipend), "end");
-	mask = 0xffffffff << ruleNow->mask_bit;
+	mask = 0xffffffff << (32 - ruleNow->mask_bit);
 
 	if (ruleNow->src == 1) {
 		if (ruleNow->iprangeFlag & (ruleNow->mask_bit == 0)) {
