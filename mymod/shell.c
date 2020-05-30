@@ -7,6 +7,8 @@
 #define RULEMAXNUM 51
 
 extern struct rule ruleList[RULEMAXNUM];
+char *rev_cmd[20] = {0};
+
 
 void remove_extra_space(char *str)
 {
@@ -163,38 +165,10 @@ int tryParseTime(int i, int argc, char *argv[])
     return 0;
 }
 
-int main()
-{
-    char cmd[100];
-    while (1)
-    {
-        printf("[filter command]:");
-        gets(cmd);
-        remove_extra_space(cmd);
-        if (!strcmp(cmd, "exit"))
-        {
-            break;
-        }
-        if (strncmp(cmd, "myiptables ", 11))
-        {
-            printf("wrong format\n");
-            continue;
-        }
 
-        char *rev_cmd[20] = {0};
-        int num = 0;
+void parse_rule(int begin, int num){
 
-        split(cmd, "-", rev_cmd, &num);
-        if (rev_cmd[1][0] == 'h')
-        {
-            system("cat help.txt");
-        }
-        else if (rev_cmd[1][0] == 'A')
-        {
-            initConst();
-            initRule(&ruleList[0]);
-            int i = 0;
-            for (i = 2; i < num; i++)
+    for (i = begin; i < num; i++)
             {
                 char command[20];
                 strcpy(command, rev_cmd[i]);
@@ -254,11 +228,11 @@ int main()
                     else if (!strcmp(rev[1], "accpet"))
                         ruleList[0].target = RU_ACCEPT;
                 }
-                else if (!strcmp(rev[0], "-sport"))
+                else if (!strcmp(rev[0], "sport"))
                 {
                     ruleList[0].sport = atoi(rev[1]);
                 }
-                else if (!strcmp(rev[0], "-dport"))
+                else if (!strcmp(rev[0], "dport"))
                 {
                     ruleList[0].dport = atoi(rev[1]);
                 }
@@ -351,25 +325,83 @@ int main()
                         strcpy(ruleList[0].iplist[i], ip[i]);
                     }
                 }
-                else if (!strcmp(rev[0], "-strMaxNum"))
+                else if (!strcmp(rev[0], "strMaxNum"))
                 {
                     ruleList[0].strFlag = atoi(rev[1]);
                 }
-                else if (!strcmp(rev[0], "-strPat"))
+                else if (!strcmp(rev[0], "strPat"))
                 {
                     strcpy(ruleList[0].strPattern, rev[1]);
                 }
-                else if (!strcmp(rev[0], "-regMaxNum"))
+                else if (!strcmp(rev[0], "regMaxNum"))
                 {
                     ruleList[0].regFlag = atoi(rev[1]);
                 }
-                else if (!strcmp(rev[0], "-regPat"))
+                else if (!strcmp(rev[0], "regPat"))
                 {
+                    int i = 0;
+                    for(i = 0; i < strlen(rev[1]); i++){
+                        if(rev[1][i] == ':')
+                            rev[1][i] = '-';
+                    }
                     strcpy(ruleList[0].regPattern, rev[1]);
                 }
+                else if (!strcmp(rev[0], "limit"))
+                {
+                    ruleList[0].limitFlag = 1;
+                    strcpy(ruleList[0].regPattern, rev[1]);
+                }
+                else if (!strcmp(rev[0], "limit_burst"))
+                {
+                    if(ruleList[0].limitFlag == 0){
+                        printf("please -limit first\n");
+                    }
+                    ruleList[0].maxToken = atoi(rev[1]);
+                }
+                else{
+                    printf("wrong format!/n");
+                }
             }
-            appendRule(1);
+}
 
+
+int main()
+{
+    char cmd[100];
+    while (1)
+    {
+        printf("[wallfire filter command]:");
+        gets(cmd);
+        remove_extra_space(cmd);
+        if (!strcmp(cmd, "exit"))
+        {
+            break;
+        }
+        if (strncmp(cmd, "myiptables ", 11))
+        {
+            printf("wrong format\n");
+            continue;
+        }
+        int i = 0;
+        for(i = 0; i < strlen(cmd); i++){
+            if(cmd[i] == '-' && cmd[i - 1] != ' '){
+                cmd[i] = ':';
+            }
+        }
+        int i = 0;
+        int num = 0;
+        split(cmd, "-", rev_cmd, &num);
+
+        if (rev_cmd[1][0] == 'h')
+        {
+            system("cat help.txt");
+        }
+        else if (rev_cmd[1][0] == 'A')
+        {
+            initConst();
+            initRule(&ruleList[0]);
+            parse_rule(2, num);
+            appendRule(1);
             displayHeader();
             printf("read: %d\n", readRuleInfo());
             if (ruleList[0].target == 1)
@@ -384,6 +416,69 @@ int main()
             displayHeader();
             for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
                 display(&ruleList[i]);
+        }
+        else if (rev_cmd[1][0] == 'D'){
+            char command[20];
+            strcpy(command, rev_cmd[1]);
+            char *rev[5] = {0};
+            int n = 0;
+            split(command, " ", rev, &n);
+            int rule_num = atoi(rev[1]);
+            deleteRule(rule_num);
+        }
+        else if(rev_cmd[1][0] == 'I'){
+            char command[20];
+            strcpy(command, rev_cmd[1]);
+            char *rev[5] = {0};
+            int n = 0;
+            split(command, " ", rev, &n);
+            int rule_num = atoi(rev[1]);
+            initConst();
+            initRule(&ruleList[0]);
+            parse_rule(2, num);
+
+            insertRule(1, rule_num);
+            
+        }
+        else if(rev_cmd[1][0] == 'L'){
+            displayHeader();
+            printf("read: %d\n", readRuleInfo());
+            if (ruleList[0].target == 1)
+            {
+                printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
+            }
+            else
+            {
+                printf("default strategy: DROP pkg:%d", ruleList[0].pkgs);
+            }
+            printf("\trule nums: %d\n", ruleList[0].bytes);
+            displayHeader();
+            for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
+                display(&ruleList[i]);
+        }
+        else if(rev_cmd[1][0] == 'R'){
+            char command[20];
+            strcpy(command, rev_cmd[1]);
+            char *rev[5] = {0};
+            int n = 0;
+            split(command, " ", rev, &n);
+            int rule_num = atoi(rev[1]);
+            initConst();
+            initRule(&ruleList[0]);
+            parse_rule(2, num);
+            deleteRule(rule_num);
+            insertRule(1, rule_num);
+        }
+        else if(!strncmp(rev_cmd[1], "default", 7)){
+            char command[20];
+            strcpy(command, rev_cmd[1]);
+            char *rev[5] = {0};
+            int n = 0;
+            split(command, " ", rev, &n);
+            if(!strcmp(rev[1], "drop"))
+                setDefaultRule(RU_DROP);
+            else if(!strcmp(rev[1], "accept"))
+                setDefaultRule(RU_ACCEPT);
         }
     }
 }

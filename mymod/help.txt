@@ -43,6 +43,8 @@
 	myiptables -R rulenum firewall-rule	
 	*将rulenum条规则替换为firewall-rule
 	------------------------------------
+	myiptables -default drop/accept
+
 
 	其中firewall-rule规则为
 	-p	协议
