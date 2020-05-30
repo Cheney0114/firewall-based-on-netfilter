@@ -47,24 +47,32 @@ struct rule
     int weekdays;
     int monthdays;
 
-    int strFlag;
-    char strPattern[STRPATSIZE + 1];
+    //match string
+    int strFlag;  //strFlag表示要接收包中字符串至少出现的次数
+    char strPattern[STRPATSIZE + 1];  //检测的字符串
+	
+    //match regex
+    int regFlag;  //regFlag表示要接收包中正则匹配至少出现的次数
+    char regPattern[STRPATSIZE + 1];   //正则表达式
 
 	int iprangeFlag;
-	int iprange_in; // 0 means ip in range is band, 1 means out is band
 	char ipstart[15];
 	char ipend[15];
 	int mask_bit;
 	int src;
 	int dst;
 
-    int sportrangeFlag;
+	int multipFlag;
+	char iplist[10][15]; // 可以储存10个不连续的ip
+	int mult_src;
+	int mult_dst;
+    
+	int sportrangeFlag;
     int sportStart;
     int sportEnd;
     int dportrangeFlag;
     int dportStart;
     int dportEnd;
-
 
     int limitFlag;
     unsigned int lastTime;
