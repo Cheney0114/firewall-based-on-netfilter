@@ -238,37 +238,79 @@ void parse_rule(int begin, int num){
                 }
                 else if (!strcmp(rev[0], "iprange_src"))
                 {
-                    char *ip[5] = {0};
-                    int n = 0;
-                    split(rev[1], ":", ip, &n);
                     ruleList[0].target = RU_DROP;
                     ruleList[0].iprangeFlag = 1;
                     ruleList[0].src = 1;
-                    strcpy(ruleList[0].ipstart, ip[0]);
-                    strcpy(ruleList[0].ipend, ip[1]);
+                    char *ip[5] = {0};
+                    int n = 0;
+                    split(rev[1], ":", ip, &n);
+
+                    char *ip_item[5] = {0};
+					split(ip[0], "/", ip_item, &n);
+					if (n == 1) {
+						strcpy(ruleList[0].ipstart, ip_item[0]);
+					} else {
+						strcpy(ruleList[0].ipstart, ip_item[0]);
+						ruleList[0].mask_start_bit = atoi(ip_item[1]);
+					}
+					split(ip[1], "/", ip_item, &n);
+					if (n == 1) {
+						strcpy(ruleList[0].ipend, ip_item[0]);
+					} else {
+						strcpy(ruleList[0].ipend, ip_item[0]);
+						ruleList[0].mask_end_bit = atoi(ip_item[1]);
+					}
                 }
                 else if (!strcmp(rev[0], "iprange_dst"))
                 {
-                    char *ip[5] = {0};
-                    int n = 0;
-                    split(rev[1], ":", ip, &n);
                     ruleList[0].target = RU_DROP;
                     ruleList[0].iprangeFlag = 1;
                     ruleList[0].dst = 1;
-                    strcpy(ruleList[0].ipstart, ip[0]);
-                    strcpy(ruleList[0].ipend, ip[1]);
-                }
-                else if (!strcmp(rev[0], "iprange"))
-                {
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ":", ip, &n);
+
+                    char *ip_item[5] = {0};
+					split(ip[0], "/", ip_item, &n);
+					if (n == 1) {
+						strcpy(ruleList[0].ipstart, ip_item[0]);
+					} else {
+						strcpy(ruleList[0].ipstart, ip_item[0]);
+						ruleList[0].mask_start_bit = atoi(ip_item[1]);
+					}
+					split(ip[1], "/", ip_item, &n);
+					if (n == 1) {
+						strcpy(ruleList[0].ipend, ip_item[0]);
+					} else {
+						strcpy(ruleList[0].ipend, ip_item[0]);
+						ruleList[0].mask_end_bit = atoi(ip_item[1]);
+					}
+                }
+                else if (!strcmp(rev[0], "iprange"))
+                {
                     ruleList[0].target = RU_DROP;
                     ruleList[0].iprangeFlag = 1;
                     ruleList[0].dst = 1;
                     ruleList[0].src = 1;
-                    strcpy(ruleList[0].ipstart, ip[0]);
-                    strcpy(ruleList[0].ipend, ip[1]);
+                    char *ip[5] = {0};
+                    int n = 0;
+                    split(rev[1], ":", ip, &n);
+
+                    char *ip_item[5] = {0};
+					split(ip[0], "/", ip_item, &n);
+					if (n == 1) {
+						strcpy(ruleList[0].ipstart, ip_item[0]);
+					} else {
+						strcpy(ruleList[0].ipstart, ip_item[0]);
+						ruleList[0].mask_start_bit = atoi(ip_item[1]);
+					}
+					split(ip[1], "/", ip_item, &n);
+					if (n == 1) {
+						strcpy(ruleList[0].ipend, ip_item[0]);
+					} else {
+						strcpy(ruleList[0].ipend, ip_item[0]);
+						ruleList[0].mask_end_bit = atoi(ip_item[1]);
+					}
                 }
                 else if (!strcmp(rev[0], "multip_src"))
                 {
@@ -278,7 +320,7 @@ void parse_rule(int begin, int num){
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ",", ip, &n);
-                    if (num > 10)
+                    if (n > 10)
                     {
                         printf("the num of IP is too much (more than 10)!");
                     }
@@ -296,7 +338,7 @@ void parse_rule(int begin, int num){
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ",", ip, &n);
-                    if (num > 10)
+                    if (n > 10)
                     {
                         printf("the num of IP is too much (more than 10)!");
                     }
@@ -315,7 +357,7 @@ void parse_rule(int begin, int num){
                     char *ip[5] = {0};
                     int n = 0;
                     split(rev[1], ",", ip, &n);
-                    if (num > 10)
+                    if (n > 10)
                     {
                         printf("the num of IP is too much (more than 10)!");
                     }

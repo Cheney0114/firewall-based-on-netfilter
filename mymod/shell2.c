@@ -439,15 +439,30 @@ int tryParseMuti(int i, int argc, char *argv[])
     {
         if (i + 1 > argc)
             return -1;
+        
+		ruleList[0].target = RU_DROP;
+		ruleList[0].iprangeFlag = 1;
+		ruleList[0].dst = 1;
+		ruleList[0].src = 1;
+		char *ip[5] = {0};
+		int n = 0;
+		split(argv[1], ":", ip, &n);
 
-        char *ip[5] = {0};
-        int n = 0;
-        split(argv[i + 1], ":", ip, &n);
-        ruleList[0].target = RU_DROP;
-        ruleList[0].iprangeFlag = 1;
-        ruleList[0].src = 1;
-        strcpy(ruleList[0].ipstart, ip[0]);
-        strcpy(ruleList[0].ipend, ip[1]);
+		char *ip_item[5] = {0};
+		split(ip[0], "/", ip_item, &n);
+		if (n == 1) {
+			strcpy(ruleList[0].ipstart, ip_item[0]);
+		} else {
+			strcpy(ruleList[0].ipstart, ip_item[0]);
+			ruleList[0].mask_start_bit = atoi(ip_item[1]);
+		}
+		split(ip[1], "/", ip_item, &n);
+		if (n == 1) {
+			strcpy(ruleList[0].ipend, ip_item[0]);
+		} else {
+			strcpy(ruleList[0].ipend, ip_item[0]);
+			ruleList[0].mask_end_bit = atoi(ip_item[1]);
+		}
 
         return 2;
     }
@@ -456,14 +471,28 @@ int tryParseMuti(int i, int argc, char *argv[])
         if (i + 1 > argc)
             return -1;
 
-        char *ip[5] = {0};
-        int n = 0;
-        split(argv[i + 1], ":", ip, &n);
-        ruleList[0].target = RU_DROP;
-        ruleList[0].iprangeFlag = 1;
-        ruleList[0].dst = 1;
-        strcpy(ruleList[0].ipstart, ip[0]);
-        strcpy(ruleList[0].ipend, ip[1]);
+		ruleList[0].target = RU_DROP;
+		ruleList[0].iprangeFlag = 1;
+		ruleList[0].dst = 1;
+		char *ip[5] = {0};
+		int n = 0;
+		split(argv[1], ":", ip, &n);
+
+		char *ip_item[5] = {0};
+		split(ip[0], "/", ip_item, &n);
+		if (n == 1) {
+			strcpy(ruleList[0].ipstart, ip_item[0]);
+		} else {
+			strcpy(ruleList[0].ipstart, ip_item[0]);
+			ruleList[0].mask_start_bit = atoi(ip_item[1]);
+		}
+		split(ip[1], "/", ip_item, &n);
+		if (n == 1) {
+			strcpy(ruleList[0].ipend, ip_item[0]);
+		} else {
+			strcpy(ruleList[0].ipend, ip_item[0]);
+			ruleList[0].mask_end_bit = atoi(ip_item[1]);
+		}
 
         return 2;
     }
@@ -472,15 +501,29 @@ int tryParseMuti(int i, int argc, char *argv[])
         if (i + 1 > argc)
             return -1;
 
-        char *ip[5] = {0};
-        int n = 0;
-        split(argv[i + 1], ":", ip, &n);
-        ruleList[0].target = RU_DROP;
-        ruleList[0].iprangeFlag = 1;
-        ruleList[0].dst = 1;
-        ruleList[0].src = 1;
-        strcpy(ruleList[0].ipstart, ip[0]);
-        strcpy(ruleList[0].ipend, ip[1]);
+		ruleList[0].target = RU_DROP;
+		ruleList[0].iprangeFlag = 1;
+		ruleList[0].dst = 1;
+		ruleList[0].src = 1;
+		char *ip[5] = {0};
+		int n = 0;
+		split(argv[1], ":", ip, &n);
+
+		char *ip_item[5] = {0};
+		split(ip[0], "/", ip_item, &n);
+		if (n == 1) {
+			strcpy(ruleList[0].ipstart, ip_item[0]);
+		} else {
+			strcpy(ruleList[0].ipstart, ip_item[0]);
+			ruleList[0].mask_start_bit = atoi(ip_item[1]);
+		}
+		split(ip[1], "/", ip_item, &n);
+		if (n == 1) {
+			strcpy(ruleList[0].ipend, ip_item[0]);
+		} else {
+			strcpy(ruleList[0].ipend, ip_item[0]);
+			ruleList[0].mask_end_bit = atoi(ip_item[1]);
+		}
 
         return 2;
     }
