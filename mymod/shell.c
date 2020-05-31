@@ -11,6 +11,7 @@ char *rev_cmd[20] = {0};
 
 
 void remove_extra_space(char *str)
+	//去除多余的空白字符
 {
     char *sp = str;
     char *prev = 0;
@@ -48,6 +49,7 @@ void remove_extra_space(char *str)
 }
 
 void split(char *src, const char *separator, char **dest, int *num)
+	//分割split函数，将src按照separator分割，分割结果保存在dest,分割数量为num
 {
     char *pNext;
     int count = 0;
@@ -167,6 +169,7 @@ int tryParseTime(int i, int argc, char *argv[])
 
 
 void parse_rule(int begin, int num){
+	//按照firewall-rule进行分步解析，具体可以见help.txt
 	int i;
     for (i = begin; i < num; i++)
             {
@@ -463,7 +466,7 @@ int main()
         }
         int num = 0;
         split(cmd, "-", rev_cmd, &num);
-
+	//接下来按照命令-h，-A等解析，具体可见help.txt或者PPT
         if (rev_cmd[1][0] == 'h')
         {
             system("cat help.txt");
