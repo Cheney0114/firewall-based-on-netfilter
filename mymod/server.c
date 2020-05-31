@@ -39,6 +39,9 @@ void display(struct rule *item)
 
 
 unsigned int get_mask(int maskbit){
+	//输入：子网掩码位数maskbit
+	//输出：子网掩码mask
+	//例如24->0xFFFFFF00
 	if (maskbit == 0) return 0;
 	unsigned int mask = 0xFFFFFFFF;
 	char* m = &mask;
@@ -55,7 +58,15 @@ unsigned int get_mask(int maskbit){
 }
 
 
-int chkBase(void) //检查基础功能——IP,端口,掩码,协议
+int chkBase(void) 
+	//检查基础功能——IP,端口,掩码,协议
+	//具体包括
+	//	source IP，掩码(source IP & mask)
+	//	dest IP，掩码(dest IP & mask)
+	//	protocol(all, tcp, udp, icmp)
+	//	source port
+	//	dest port
+	//	flag(ack, fin,...)
 {    
 	int flag = 1;
 	 printk("package from %d.%d.%d.%d\n",iphdrNow->saddr&0x000000FF,
@@ -722,6 +733,8 @@ uint32_t get_nowtime(void){
 }
 
 uint32_t parse_rate(const char* rate, uint32_t* val){
+	//解析输入的rate
+	//6/minute --> 10000ms,每过10000ms令牌加1
 	char *delim;
 	uint32_t r;	
 	uint32_t mult = 1;
@@ -750,6 +763,9 @@ uint32_t parse_rate(const char* rate, uint32_t* val){
 }
 
 int chkLimit(void){
+	//检查是否有令牌，能否通过限流检测
+	//通过，return 1
+	//否则，return 0
 	if(ruleNow->limitFlag == 1){
         ruleNow->limitFlag = -1;
         if(!parse_rate(ruleNow->rateStr, &(ruleNow->rate))){
