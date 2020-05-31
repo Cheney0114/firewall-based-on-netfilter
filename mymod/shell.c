@@ -325,7 +325,7 @@ void parse_rule(int begin, int num){
                         printf("the num of IP is too much (more than 10)!");
                     }
                     int i;
-                    for (i = 0; i < num; i++)
+                    for (i = 0; i < n; i++)
                     {
                         strcpy(ruleList[0].iplist[i], ip[i]);
                     }
@@ -343,7 +343,7 @@ void parse_rule(int begin, int num){
                         printf("the num of IP is too much (more than 10)!");
                     }
                     int i;
-                    for (i = 0; i < num; i++)
+                    for (i = 0; i < n; i++)
                     {
                         strcpy(ruleList[0].iplist[i], ip[i]);
                     }
@@ -362,7 +362,7 @@ void parse_rule(int begin, int num){
                         printf("the num of IP is too much (more than 10)!");
                     }
                     int i;
-                    for (i = 0; i < num; i++)
+                    for (i = 0; i < n; i++)
                     {
                         strcpy(ruleList[0].iplist[i], ip[i]);
                     }
@@ -391,7 +391,7 @@ void parse_rule(int begin, int num){
                 else if (!strcmp(rev[0], "limit"))
                 {
                     ruleList[0].limitFlag = 1;
-                    strcpy(ruleList[0].regPattern, rev[1]);
+                    strcpy(ruleList[0].rateStr, rev[1]);
                 }
                 else if (!strcmp(rev[0], "limit_burst"))
                 {
@@ -412,6 +412,7 @@ int main()
     char cmd[1000];
     while (1)
     {
+    	initConst();
         printf("[wallfire filter command]:");
         gets(cmd);
         remove_extra_space(cmd);
@@ -440,7 +441,7 @@ int main()
         }
         else if (rev_cmd[1][0] == 'A')
         {
-            initConst();
+            
             initRule(&ruleList[0]);
             parse_rule(2, num);
             appendRule(1);
