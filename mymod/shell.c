@@ -432,8 +432,8 @@ void parse_rule(int begin, int num){
                     }
                     ruleList[0].maxToken = atoi(rev[1]);
                 }
-                else{
-                    printf("wrong format!/n");
+                else if(ruleList[0].timeFlag == 0){
+                    printf("wrong format!\n");
                 }
             }
 }
