@@ -418,7 +418,7 @@ int main()
         remove_extra_space(cmd);
         if (!strcmp(cmd, "exit"))
         {
-			flushRule();
+			
             break;
         }
         if (strncmp(cmd, "myiptables ", 11))
@@ -512,6 +512,9 @@ int main()
             deleteRule(rule_num);
             insertRule(1, rule_num);
         }
+		else if(rev_cmd[1][0] == 'F'){
+			flushRule();
+		}
         else if(!strncmp(rev_cmd[1], "default", 7)){
             char command[200];
             strcpy(command, rev_cmd[1]);
