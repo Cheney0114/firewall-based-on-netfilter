@@ -582,6 +582,8 @@ int chkStr(void)
 
 unsigned int ip2num(unsigned int ip, char* name)
 {
+	// 函数将网络序的IP转化成点分十进制
+	//
 	unsigned int num;
 	unsigned int a, b, c, d;
 	a = ip >> 0 & 0xff;
@@ -599,13 +601,16 @@ unsigned int ip2num(unsigned int ip, char* name)
 
 int chkIprange(void)
 {
+	// return 1 表示IP在设定的IP范围内,执行默认操作
+	// return 0 表示IP不在设定的IP范围内
+	// 
 	unsigned int ip_src, ip_dst, ip_start, ip_end, mask_start, mask_end, tmp;
 	ip_src = ip2num(iphdrNow->saddr, "src");
 	ip_dst = ip2num(iphdrNow->daddr, "dst");
 	ip_start = ip2num(in_aton(ruleNow->ipstart), "start");
 	ip_end = ip2num(in_aton(ruleNow->ipend), "end");
 	
-	
+	// 将mask纳入考虑，扩展IP区域
 	mask_start = 0xffffffff << (32 - ruleNow->mask_start_bit);
 	ip_start = ip_start & mask_start;
 	mask_end = 0xffffffff << (32 - ruleNow->mask_end_bit);
@@ -615,6 +620,8 @@ int chkIprange(void)
 	}
 	printk("src %x, dst %x, ban (%x - %x)\n", ip_src, ip_dst, ip_start, ip_end);
 
+	// 按src和dst的标志位，分别对目的IP和源IP处理
+	// 
 	if (ruleNow->iprangeFlag) {
 		if (ruleNow->src == 1) {
 			if(  ip_src < ip_start  ) {
@@ -639,6 +646,9 @@ int chkIprange(void)
 }
 
 int chkMultip(void) {
+	// return 1 表示IP匹配到iplist中设定的IP,执行默认操作
+	// return 0 表示IP没有匹配到
+	// 
 	unsigned int ip_src, ip_dst, ip_ban;
 	ip_src = ip2num(iphdrNow->saddr, "src");
 	ip_dst = ip2num(iphdrNow->daddr, "dst");
@@ -649,6 +659,7 @@ int chkMultip(void) {
 		strcpy(ip, ruleNow->iplist[i]);
 		while ((strlen(ip) > 0) & (i < 10)) {
 			ip_ban = ip2num(in_aton(ip), "ban");
+			// 按src和dst的标志位，分别对目的IP和源IP处理
 			if (ruleNow->mult_src) {
 				if (ip_src == ip_ban) {
 					return 1;
