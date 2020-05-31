@@ -75,7 +75,7 @@ int tryParseTime(int i, int argc, char *argv[])
     //      若解析时发生错误： 返回 -1
     if (i + 1 > argc)
         return -1;
-    printf("argv[%d]:%s\n", i, argv[i]);
+    //printf("argv[%d]:%s\n", i, argv[i]);
     if (!strcmp(argv[i], "time"))
     {
         printf("into time\n");
@@ -445,20 +445,20 @@ int main()
             initRule(&ruleList[0]);
             parse_rule(2, num);
             appendRule(1);
-            displayHeader();
-            printf("read: %d\n", readRuleInfo());
-            if (ruleList[0].target == 1)
-            {
-                printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
-            }
-            else
-            {
-                printf("default strategy: DROP pkg:%d", ruleList[0].pkgs);
-            }
-            printf("\trule nums: %d\n", ruleList[0].bytes);
-            displayHeader();
-            for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
-                display(&ruleList[i]);
+            //displayHeader();
+            //printf("read: %d\n", readRuleInfo());
+            //if (ruleList[0].target == 1)
+            //{
+            //   printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
+            //}
+            //else
+            //{
+            //    printf("default strategy: DROP pkg:%d", ruleList[0].pkgs);
+            //}
+            //printf("\trule nums: %d\n", ruleList[0].bytes);
+            //displayHeader();
+            //for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
+            //    display(&ruleList[i]);
         }
         else if (rev_cmd[1][0] == 'D'){
             char command[200];
@@ -484,8 +484,9 @@ int main()
             
         }
         else if(rev_cmd[1][0] == 'L'){
-            displayHeader();
-            printf("read: %d\n", readRuleInfo());
+            //displayHeader();
+			readRuleInfo();
+            //printf("read: %d\n", readRuleInfo());
             if (ruleList[0].target == 1)
             {
                 printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
