@@ -50,7 +50,7 @@ unsigned int get_mask(int maskbit){
 	m[1] = m[2];
 	m[2] = tmp2;
 	m[3] = tmp1;	
-	printk("%d mask:%x\n", maskbit, mask);
+	//printk("%d mask:%x\n", maskbit, mask);
 	return mask;
 }
 
@@ -149,7 +149,7 @@ int chkBase(void) //检查基础功能——IP,端口,掩码,协议
             flag &= thdr->urg;
         
     }
-	printk("chkBase:%d\n", flag);
+	//printk("chkBase:%d\n", flag);
     return flag;
 }
 
@@ -755,7 +755,7 @@ int chkLimit(void){
         if(!parse_rate(ruleNow->rateStr, &(ruleNow->rate))){
             printk("sry, limit format is illegal.\n");
         }
-        printk("this rule rate is %d\n", ruleNow->rate);
+        //printk("this rule rate is %d\n", ruleNow->rate);
         ruleNow->lastTime = get_nowtime();
         return 1;
     }
@@ -768,8 +768,8 @@ int chkLimit(void){
         ruleNow->token = ruleNow->maxToken; 
         ruleNow->lastTime = t;
     }
-	printk("new now_time_ms %ld\n", ruleNow->lastTime);
-	printk("now token num is %d\n", ruleNow->token);
+	//printk("new now_time_ms %ld\n", ruleNow->lastTime);
+	//printk("now token num is %d\n", ruleNow->token);
 	if(ruleNow->token){
 		ruleNow->token-=1;
 		return 1;
