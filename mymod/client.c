@@ -228,7 +228,7 @@ void displayHeader()
 
 void displayIprangeMatch(struct rule *item)
 {
-	printf("iprange: %d, (%s/%d - %s/%d)", item->iprangeFlag, item->ipstart, item->mask_start_bit, item->ipend, item->mask_end_bit);
+	printf("iprange: %d, dst: %d, src: %d, ip: (%s/%d - %s/%d)\n", item->iprangeFlag, item->dst, item->src, item->ipstart, item->mask_start_bit, item->ipend, item->mask_end_bit);
 }
 
 void displayMultipMatch(struct rule *item)
@@ -243,6 +243,7 @@ void displayMultipMatch(struct rule *item)
         i++;
         strcpy(ip, item->iplist[i]);
     }
+    printf("\n");
 }
 
 void displayLimitMatch(struct rule *item)
@@ -271,10 +272,8 @@ void display(struct rule *item)
     printf("\n");		
 	if (item->iprangeFlag)
 		displayIprangeMatch(item);
-    printf("\n");
     if (item->multipFlag)
         displayMultipMatch(item);
-    printf("\n");
     if (item->sportrangeFlag || item->dportrangeFlag)
         displayPortrangeMatch(item);
     if (item->limitFlag)

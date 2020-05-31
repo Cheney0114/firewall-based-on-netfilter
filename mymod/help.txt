@@ -64,9 +64,9 @@
 	--regMaxNum  检测的正则表达式出现的阈值次数
 	--regPat   检测的正则表达式
 
-	--iprange_src 一段连续源ip地址 (首尾地址用冒号分割)
-	--iprange_dst 一段连续目的ip地址 (首尾地址用冒号分割)
-	--iprange 一段连续源\目的ip地址 (首尾地址用冒号分割)
+	--iprange_src[/mask] 一段连续源ip地址 (首尾地址用冒号分割),可以使用mask形式的IP
+	--iprange_dst[/mask] 一段连续目的ip地址 (首尾地址用冒号分割),可以使用mask形式的IP
+	--iprange[/mask] 一段连续源\目的ip地址 (首尾地址用冒号分割),可以使用mask形式的IP
 
 	--multip_src 多个不连续的源ip地址 (地址用逗号分割，最多10个)
 	--multip_dst 多个不连续的目的ip地址 (地址用逗号分割，最多10个)

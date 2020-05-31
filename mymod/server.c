@@ -803,6 +803,8 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         {
             flag &= chkRegex();
         }
+		printk("flag: %d\n", flag);
+		printk("iprage: %d\n", ruleNow->iprangeFlag);
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();
