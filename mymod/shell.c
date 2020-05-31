@@ -270,6 +270,7 @@ void parse_rule(int begin, int num){
 				}
                 else if (!strcmp(rev[0], "iprange_src"))
                 {
+					// 设置各类标志位
                     ruleList[0].target = RU_DROP;
                     ruleList[0].iprangeFlag = 1;
                     ruleList[0].src = 1;
@@ -277,6 +278,7 @@ void parse_rule(int begin, int num){
                     int n = 0;
                     split(rev[1], ":", ip, &n);
 
+					// 分别提出start IP，end IP， 判断有无mask并提取出来
                     char *ip_item[5] = {0};
 					split(ip[0], "/", ip_item, &n);
 					if (n == 1) {
@@ -295,6 +297,7 @@ void parse_rule(int begin, int num){
                 }
                 else if (!strcmp(rev[0], "iprange_dst"))
                 {
+					// 设置各类标志位
                     ruleList[0].target = RU_DROP;
                     ruleList[0].iprangeFlag = 1;
                     ruleList[0].dst = 1;
@@ -302,6 +305,7 @@ void parse_rule(int begin, int num){
                     int n = 0;
                     split(rev[1], ":", ip, &n);
 
+					// 分别提出start IP，end IP， 判断有无mask并提取出来
                     char *ip_item[5] = {0};
 					split(ip[0], "/", ip_item, &n);
 					if (n == 1) {
@@ -320,6 +324,7 @@ void parse_rule(int begin, int num){
                 }
                 else if (!strcmp(rev[0], "iprange"))
                 {
+					// 设置各类标志位
                     ruleList[0].target = RU_DROP;
                     ruleList[0].iprangeFlag = 1;
                     ruleList[0].dst = 1;
@@ -328,6 +333,7 @@ void parse_rule(int begin, int num){
                     int n = 0;
                     split(rev[1], ":", ip, &n);
 
+					// 提出start IP， 判断有无mask并提取出来
                     char *ip_item[5] = {0};
 					split(ip[0], "/", ip_item, &n);
 					if (n == 1) {
@@ -346,11 +352,13 @@ void parse_rule(int begin, int num){
                 }
                 else if (!strcmp(rev[0], "multip_src"))
                 {
+					// 设置各类标志位
                     ruleList[0].target = RU_DROP;
                     ruleList[0].multipFlag = 1;
                     ruleList[0].mult_src = 1;
                     char *ip[5] = {0};
                     int n = 0;
+					// 将多个IP存入iplist结构中去
                     split(rev[1], ",", ip, &n);
                     if (n > 10)
                     {
@@ -364,11 +372,13 @@ void parse_rule(int begin, int num){
                 }
                 else if (!strcmp(rev[0], "multip_dst"))
                 {
+					// 设置各类标志位
                     ruleList[0].target = RU_DROP;
                     ruleList[0].multipFlag = 1;
                     ruleList[0].mult_dst = 1;
                     char *ip[5] = {0};
                     int n = 0;
+					// 将多个IP存入iplist结构中去
                     split(rev[1], ",", ip, &n);
                     if (n > 10)
                     {
@@ -382,12 +392,14 @@ void parse_rule(int begin, int num){
                 }
                 else if (!strcmp(rev[0], "multip"))
                 {
+					// 设置各类标志位
                     ruleList[0].target = RU_DROP;
                     ruleList[0].multipFlag = 1;
                     ruleList[0].mult_src = 1;
                     ruleList[0].mult_dst = 1;
                     char *ip[5] = {0};
                     int n = 0;
+					// 将多个IP存入iplist结构中去
                     split(rev[1], ",", ip, &n);
                     if (n > 10)
                     {
