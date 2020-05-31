@@ -170,7 +170,7 @@ void parse_rule(int begin, int num){
 	int i;
     for (i = begin; i < num; i++)
             {
-                char command[20];
+                char command[200];
                 strcpy(command, rev_cmd[i]);
                 char *rev[5] = {0};
                 int n = 0;
@@ -409,7 +409,7 @@ void parse_rule(int begin, int num){
 
 int main()
 {
-    char cmd[100];
+    char cmd[1000];
     while (1)
     {
         printf("[wallfire filter command]:");
@@ -427,7 +427,7 @@ int main()
         }
         int i = 0;
         for(i = 0; i < strlen(cmd); i++){
-            if(cmd[i] == '-' && cmd[i - 1] != ' '){
+            if(cmd[i] == '-' && cmd[i - 1] != ' ' && cmd[i-1] != '-'){
                 cmd[i] = ':';
             }
         }
@@ -460,7 +460,7 @@ int main()
                 display(&ruleList[i]);
         }
         else if (rev_cmd[1][0] == 'D'){
-            char command[20];
+            char command[200];
             strcpy(command, rev_cmd[1]);
             char *rev[5] = {0};
             int n = 0;
@@ -469,7 +469,7 @@ int main()
             deleteRule(rule_num);
         }
         else if(rev_cmd[1][0] == 'I'){
-            char command[20];
+            char command[200];
             strcpy(command, rev_cmd[1]);
             char *rev[5] = {0};
             int n = 0;
@@ -499,7 +499,7 @@ int main()
                 display(&ruleList[i]);
         }
         else if(rev_cmd[1][0] == 'R'){
-            char command[20];
+            char command[200];
             strcpy(command, rev_cmd[1]);
             char *rev[5] = {0};
             int n = 0;
@@ -512,7 +512,7 @@ int main()
             insertRule(1, rule_num);
         }
         else if(!strncmp(rev_cmd[1], "default", 7)){
-            char command[20];
+            char command[200];
             strcpy(command, rev_cmd[1]);
             char *rev[5] = {0};
             int n = 0;
