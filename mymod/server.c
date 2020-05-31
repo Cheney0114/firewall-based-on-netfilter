@@ -611,23 +611,24 @@ int chkIprange(void)
 	mask_end = 0xffffffff << (32 - ruleNow->mask_end_bit);
 	tmp = 0xffffffff >> (ruleNow->mask_end_bit);
 	if (ruleNow->mask_end_bit != 32) {
-		ip_end = ip_end & mask_end + tmp + 1;
+		ip_end = (ip_end & mask_end) + tmp;
 	}
+	printk("src %x, dst %x, ban (%x - %x)\n", ip_src, ip_dst, ip_start, ip_end);
 
 	if (ruleNow->iprangeFlag) {
 		if (ruleNow->src == 1) {
-			if(  ip_src <= ip_start  ) {
+			if(  ip_src < ip_start  ) {
 				return 0;
-			} else if(ip_src >= ip_end) {
+			} else if(ip_src > ip_end) {
 				return 0;
 			} else {
 				return 1;
 			}
 		}
 		if (ruleNow->dst == 1) {
-			if(  ip_dst <= ip_start  ) {
+			if(  ip_dst < ip_start  ) {
 				return 0;
-			} else if(ip_dst >= ip_end) {
+			} else if(ip_dst > ip_end) {
 				return 0;
 			} else {
 				return 1;
@@ -803,8 +804,6 @@ unsigned int hook_func(unsigned int hooknum, //where to put the filter
         {
             flag &= chkRegex();
         }
-		printk("flag: %d\n", flag);
-		printk("iprage: %d\n", ruleNow->iprangeFlag);
         if (ruleNow->iprangeFlag)
         {
             flag &= chkIprange();

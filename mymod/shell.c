@@ -75,7 +75,7 @@ int tryParseTime(int i, int argc, char *argv[])
     //      若解析时发生错误： 返回 -1
     if (i + 1 > argc)
         return -1;
-    printf("argv[%d]:%s", i, argv[i]);
+    printf("argv[%d]:%s\n", i, argv[i]);
     if (!strcmp(argv[i], "time"))
     {
         printf("into time\n");
@@ -248,14 +248,14 @@ void parse_rule(int begin, int num){
                     char *ip_item[5] = {0};
 					split(ip[0], "/", ip_item, &n);
 					if (n == 1) {
-						strcpy(ruleList[0].ipstart, ip_item[0]);
+						strcpy(ruleList[0].ipstart, ip[0]);
 					} else {
 						strcpy(ruleList[0].ipstart, ip_item[0]);
 						ruleList[0].mask_start_bit = atoi(ip_item[1]);
 					}
 					split(ip[1], "/", ip_item, &n);
 					if (n == 1) {
-						strcpy(ruleList[0].ipend, ip_item[0]);
+						strcpy(ruleList[0].ipend, ip[1]);
 					} else {
 						strcpy(ruleList[0].ipend, ip_item[0]);
 						ruleList[0].mask_end_bit = atoi(ip_item[1]);
@@ -273,14 +273,14 @@ void parse_rule(int begin, int num){
                     char *ip_item[5] = {0};
 					split(ip[0], "/", ip_item, &n);
 					if (n == 1) {
-						strcpy(ruleList[0].ipstart, ip_item[0]);
+						strcpy(ruleList[0].ipstart, ip[0]);
 					} else {
 						strcpy(ruleList[0].ipstart, ip_item[0]);
 						ruleList[0].mask_start_bit = atoi(ip_item[1]);
 					}
 					split(ip[1], "/", ip_item, &n);
 					if (n == 1) {
-						strcpy(ruleList[0].ipend, ip_item[0]);
+						strcpy(ruleList[0].ipend, ip[1]);
 					} else {
 						strcpy(ruleList[0].ipend, ip_item[0]);
 						ruleList[0].mask_end_bit = atoi(ip_item[1]);
@@ -299,14 +299,14 @@ void parse_rule(int begin, int num){
                     char *ip_item[5] = {0};
 					split(ip[0], "/", ip_item, &n);
 					if (n == 1) {
-						strcpy(ruleList[0].ipstart, ip_item[0]);
+						strcpy(ruleList[0].ipstart, ip[0]);
 					} else {
 						strcpy(ruleList[0].ipstart, ip_item[0]);
 						ruleList[0].mask_start_bit = atoi(ip_item[1]);
 					}
 					split(ip[1], "/", ip_item, &n);
 					if (n == 1) {
-						strcpy(ruleList[0].ipend, ip_item[0]);
+						strcpy(ruleList[0].ipend, ip[1]);
 					} else {
 						strcpy(ruleList[0].ipend, ip_item[0]);
 						ruleList[0].mask_end_bit = atoi(ip_item[1]);
