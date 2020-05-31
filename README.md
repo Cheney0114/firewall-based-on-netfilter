@@ -9,12 +9,14 @@
 
 
 安装: 
-cd mymod
+
+在mymod目录下执行
 
 make install
 
 启动:
-cd mymod
+
+在mymod目录下执行
 
 ./shell.o
 
@@ -22,7 +24,8 @@ cd mymod
 https://github.com/Cheney0114/firewall-based-on-netfilter/blob/master/mymod/help.txt
 
 卸载:
-cd mymod
+
+在mymod目录下执行
 
 make uninstall
 
