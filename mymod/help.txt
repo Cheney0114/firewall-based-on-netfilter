@@ -43,8 +43,14 @@
 	myiptables -R rulenum firewall-rule	
 	*将rulenum条规则替换为firewall-rule
 	------------------------------------
-	myiptables -default drop/accept
-
+	myiptables --default drop/accept
+	*配置默认规则是接收或者丢弃
+	------------------------------------
+	myiptables -F
+	*清空当前规则集合
+	------------------------------------
+	exit
+	*退出该程序(规则会被后台保存)
 
 	其中firewall-rule规则为
 	-p	协议
@@ -53,7 +59,8 @@
 	-P	策略
 	--sport	源端口
 	--dport	目的端口
-
+	--flag [ack|fin|psh|urg|syn|rst]
+	
 
 	--limit xxx/[second|minute|hour|day]
 	--limit_burst xxx

@@ -11,6 +11,7 @@ char *rev_cmd[20] = {0};
 
 
 void remove_extra_space(char *str)
+	//去除多余的空白字符
 {
     char *sp = str;
     char *prev = 0;
@@ -48,6 +49,7 @@ void remove_extra_space(char *str)
 }
 
 void split(char *src, const char *separator, char **dest, int *num)
+	//分割split函数，将src按照separator分割，分割结果保存在dest,分割数量为num
 {
     char *pNext;
     int count = 0;
@@ -75,7 +77,7 @@ int tryParseTime(int i, int argc, char *argv[])
     //      若解析时发生错误： 返回 -1
     if (i + 1 > argc)
         return -1;
-    printf("argv[%d]:%s\n", i, argv[i]);
+    //printf("argv[%d]:%s\n", i, argv[i]);
     if (!strcmp(argv[i], "time"))
     {
         printf("into time\n");
@@ -167,6 +169,7 @@ int tryParseTime(int i, int argc, char *argv[])
 
 
 void parse_rule(int begin, int num){
+	//按照firewall-rule进行分步解析，具体可以见help.txt
 	int i;
     for (i = begin; i < num; i++)
             {
@@ -236,6 +239,35 @@ void parse_rule(int begin, int num){
                 {
                     ruleList[0].dport = atoi(rev[1]);
                 }
+	    		else if(!strcmp(rev[0], "flag")){
+					int j = 0;
+					ruleList[0].flags[0] = 1;
+					for(j = 1; j < n; j++){
+						if(!strcmp(rev[j], "fin")){
+							ruleList[0].flags[1] = 1;
+						}
+						else if(!strcmp(rev[j], "syn")){
+							ruleList[0].flags[2] = 1;
+						}
+						else if(!strcmp(rev[j], "rst")){
+							ruleList[0].flags[3] = 1;
+						}
+						else if(!strcmp(rev[j], "psh")){
+							ruleList[0].flags[4] = 1;
+						}
+						else if(!strcmp(rev[j], "ack")){
+							ruleList[0].flags[5] = 1;
+						}
+						else if(!strcmp(rev[j], "urg")){
+							ruleList[0].flags[6] = 1;
+						}
+						else{
+							printf("flag should be fin, syn, rst, psh, ack, urg.\n");
+						}
+						
+						
+					}
+				}
                 else if (!strcmp(rev[0], "iprange_src"))
                 {
                     ruleList[0].target = RU_DROP;
@@ -258,7 +290,7 @@ void parse_rule(int begin, int num){
 						strcpy(ruleList[0].ipend, ip[1]);
 					} else {
 						strcpy(ruleList[0].ipend, ip_item[0]);
-						ruleList[0].mask_end_bit = atoi(ip_item[1]);
+						ruleList[0].mask_end_bit = atoi(ip_item[1]);	
 					}
                 }
                 else if (!strcmp(rev[0], "iprange_dst"))
@@ -400,8 +432,8 @@ void parse_rule(int begin, int num){
                     }
                     ruleList[0].maxToken = atoi(rev[1]);
                 }
-                else{
-                    printf("wrong format!/n");
+                else if(ruleList[0].timeFlag == 0){
+                    printf("wrong format!\n");
                 }
             }
 }
@@ -434,7 +466,7 @@ int main()
         }
         int num = 0;
         split(cmd, "-", rev_cmd, &num);
-
+	//接下来按照命令-h，-A等解析，具体可见help.txt或者PPT
         if (rev_cmd[1][0] == 'h')
         {
             system("cat help.txt");
@@ -445,20 +477,20 @@ int main()
             initRule(&ruleList[0]);
             parse_rule(2, num);
             appendRule(1);
-            displayHeader();
-            printf("read: %d\n", readRuleInfo());
-            if (ruleList[0].target == 1)
-            {
-                printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
-            }
-            else
-            {
-                printf("default strategy: DROP pkg:%d", ruleList[0].pkgs);
-            }
-            printf("\trule nums: %d\n", ruleList[0].bytes);
-            displayHeader();
-            for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
-                display(&ruleList[i]);
+            //displayHeader();
+            //printf("read: %d\n", readRuleInfo());
+            //if (ruleList[0].target == 1)
+            //{
+            //   printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
+            //}
+            //else
+            //{
+            //    printf("default strategy: DROP pkg:%d", ruleList[0].pkgs);
+            //}
+            //printf("\trule nums: %d\n", ruleList[0].bytes);
+            //displayHeader();
+            //for (i = 1; i <= ruleList[0].bytes /*rule总个数*/; i++)
+            //    display(&ruleList[i]);
         }
         else if (rev_cmd[1][0] == 'D'){
             char command[200];
@@ -484,8 +516,9 @@ int main()
             
         }
         else if(rev_cmd[1][0] == 'L'){
-            displayHeader();
-            printf("read: %d\n", readRuleInfo());
+            //displayHeader();
+			readRuleInfo();
+            //printf("read: %d\n", readRuleInfo());
             if (ruleList[0].target == 1)
             {
                 printf("default strategy: ACCEPT pkg:%d", ruleList[0].pkgs);
