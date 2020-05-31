@@ -236,6 +236,35 @@ void parse_rule(int begin, int num){
                 {
                     ruleList[0].dport = atoi(rev[1]);
                 }
+	    		else if(!strcmp(rev[0], "flag")){
+					int j = 0;
+					ruleList[0].flags[0] = 1;
+					for(j = 1; j < n; j++){
+						if(!strcmp(rev[j], "fin")){
+							ruleList[0].flags[1] = 1;
+						}
+						else if(!strcmp(rev[j], "syn")){
+							ruleList[0].flags[2] = 1;
+						}
+						else if(!strcmp(rev[j], "rst")){
+							ruleList[0].flags[3] = 1;
+						}
+						else if(!strcmp(rev[j], "psh")){
+							ruleList[0].flags[4] = 1;
+						}
+						else if(!strcmp(rev[j], "ack")){
+							ruleList[0].flags[5] = 1;
+						}
+						else if(!strcmp(rev[j], "urg")){
+							ruleList[0].flags[6] = 1;
+						}
+						else{
+							printf("flag should be fin, syn, rst, psh, ack, urg.\n");
+						}
+						
+						
+					}
+				}
                 else if (!strcmp(rev[0], "iprange_src"))
                 {
                     ruleList[0].target = RU_DROP;
@@ -258,7 +287,7 @@ void parse_rule(int begin, int num){
 						strcpy(ruleList[0].ipend, ip[1]);
 					} else {
 						strcpy(ruleList[0].ipend, ip_item[0]);
-						ruleList[0].mask_end_bit = atoi(ip_item[1]);
+						ruleList[0].mask_end_bit = atoi(ip_item[1]);	
 					}
                 }
                 else if (!strcmp(rev[0], "iprange_dst"))
